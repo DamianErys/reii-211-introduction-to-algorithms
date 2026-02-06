@@ -1,6 +1,6 @@
 # REII 211: Introduction to Algorithms
 
-**North-West University | Faculty of Engineering*
+**North-West University | Faculty of Engineering**
 
 ---
 
@@ -32,7 +32,7 @@ Everything you need to succeed:
 - Links to extra classes and resources
 
 ### 5. Practical Assignments
-Hands-on assignments to apply what you've learned and build real algorithmic solutions.
+The module's practical assignments.
 
 ---
 
@@ -41,7 +41,6 @@ Hands-on assignments to apply what you've learned and build real algorithmic sol
 1. **Set up your IDE** - Choose between PyCharm or VSCode
 2. **Complete the Python Onramp** - Get comfortable with Python basics
 3. **Work through the study units** - Master algorithms one unit at a time
-4. **Practice, practice, practice!** - Use the exercises and assignments
 
 ---
 
@@ -56,6 +55,8 @@ Hands-on assignments to apply what you've learned and build real algorithmic sol
 This is a living document that will grow and improve throughout the semester and beyond. It's designed to serve students for years to come.
 
 **Status**: Active Development - New content added regularly!
+
+**NOTE** Efundi will still be used for ggrades, communication and submission - gitbook will be used for information only!
 
 ---
 
