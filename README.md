@@ -17,7 +17,7 @@ This module has recently transitioned from C to Python (as of 2025). We've prepa
 ## What's Inside
 
 ### 1. Welcome and Introduction
-Get started with the course, set up your development environment, and complete the Python onramp to ensure you're ready for algorithmic thinking in Python.
+Get started with the course, set up your development environment, and complete the Python onramp to ensure you're ready for computational thinking in Python.
 
 ### 2. Study Units (1-5)
 Core content covering the fundamental algorithms and data structures you need to master.
@@ -46,7 +46,7 @@ The module's practical assignments.
 
 ## Learning Philosophy
 
-> **Understanding over syntax**: This course focuses on algorithmic thinking and problem-solving. Understanding *how* and *why* algorithms work is more important than memorizing complex syntax. Use tools like AI assistants wisely - they can help with code, but the algorithmic insight must be yours.
+> **Understanding over syntax**: This course focuses on computational thinking and problem-solving. Understanding *how* and *why* algorithms work is more important than memorizing complex syntax. Use tools like AI assistants wisely - they can help with code, but the algorithmic insight must be yours.
 
 ---
 

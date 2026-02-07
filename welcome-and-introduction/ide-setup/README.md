@@ -33,7 +33,7 @@ Before we dive into Python and algorithms, you need to set up your development e
 - Why it's efficient (or not)
 - When to apply it
 
-The complex syntax? That's a future-you problem. Your job now is to understand algorithmic thinking.
+The complex syntax? That's a future-you problem. Your job now is to understand computational thinking.
 
 ### Setup Instructions
 
