@@ -4,7 +4,7 @@ Welcome to the Python Onramp!
 
 ## What's This About?
 
-You're here because REII 211 has transitioned from C to Python. If you have C experience, great! Python will feel familiar but more concise.
+You're here because REII 211 has transitioned from C to Python. All 2nd year students should have C experience, thus, Python will feel familiar but more concise.
 
 ## What You'll Learn
 
@@ -13,7 +13,6 @@ This onramp covers everything you need to know about Python for this algorithms 
 - Basic syntax and data types
 - Control structures (if/else, loops)
 - Functions and scope
-- Lists, dictionaries, and other data structures
 - Basic algorithm implementation patterns
 
 ---
@@ -26,7 +25,7 @@ Work through the **entire Jupyter notebook** at your own pace. The exercises are
 
 ### For Students Already Comfortable with Python
 
-If you already know Python basics, **you only need to complete the problem questions** scattered throughout the notebook. These will verify you're ready for the algorithmic work ahead.
+If you already know Python basics, **you only need to complete the problem questions** at the end of the notebook. These will verify you're ready for the algorithmic work ahead.
 
 ---
 
@@ -60,13 +59,8 @@ The Jupyter notebook file `PythonOnramp.ipynb` is availible under assignments on
 
 ## Notebook Structure
 
-The notebook is divided into sections:
+The notebook is divided into 15 sections:
 
-1. **Python Basics** - Variables, data types, operators
-2. **Control Flow** - If statements, loops, break/continue
-3. **Functions** - Defining and calling functions, parameters, return values
-4. **Data Structures** - Lists, tuples, dictionaries, sets
-5. **Algorithm Patterns** - Common patterns you'll use throughout the course
 
 Each section includes:
 - Explanations and examples
@@ -84,7 +78,6 @@ By the end of the onramp, you should be comfortable:
 - Using variables and basic data types
 - Implementing loops and conditional logic
 - Writing and calling functions
-- Working with lists and dictionaries
 - Reading and understanding Python code for algorithms
 
 ---

@@ -10,7 +10,7 @@ Welcome to REII 211! This course introduces you to the fundamental concepts of a
 
 ### Important Update: C → Python Transition
 
-This module has recently transitioned from C to Python (as of 2025). We've prepared a comprehensive Python onramp to ensure all students are ready, regardless of their prior programming experience.
+This module has recently transitioned from C to Python (as of 2025). We've prepared a Python onramp to ensure all students are ready, regardless of their prior programming experience.
 
 ---
 
@@ -20,10 +20,10 @@ This module has recently transitioned from C to Python (as of 2025). We've prepa
 Get started with the course, set up your development environment, and complete the Python onramp to ensure you're ready for algorithmic thinking in Python.
 
 ### 2. Study Units (1-5)
-Core content covering the fundamental algorithms and data structures you need to master. Each unit follows a consistent structure: Theory → Examples → Exercises → Solutions.
+Core content covering the fundamental algorithms and data structures you need to master.
 
 ### 3. Additional Content
-For curious learners who want to explore beyond the syllabus. Algorithm visualizations, interesting applications, and fun challenges await!
+For curious learners who want to explore beyond the syllabus. Algorithm visualizations, interesting applications, and more.
 
 ### 4. Learning Materials
 Everything you need to succeed:
@@ -56,7 +56,7 @@ This is a living document that will grow and improve throughout the semester and
 
 **Status**: Active Development - New content added regularly!
 
-**NOTE** Efundi will still be used for ggrades, communication and submission - gitbook will be used for information only!
+**NOTE** Efundi will still be used for gradebook, communication and submission - gitbook will be used for information only!
 
 ---
 

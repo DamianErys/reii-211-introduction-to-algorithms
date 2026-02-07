@@ -12,5 +12,5 @@ Welcome to the course! This GitBook will be your companion throughout the semest
 
 ## Important Note
 
-This module has recently transitioned from C to Python. Don't worry if you're more comfortable with C - we've prepared a comprehensive Python onramp to get you up to speed, or you may continue working in C or C++ if you would prefer.
+This module has recently transitioned from C to Python. Don't worry if you're more comfortable with C - we've prepared a Python onramp to get you up to speed, or you may continue working in C or C++ if you would prefer.
 
