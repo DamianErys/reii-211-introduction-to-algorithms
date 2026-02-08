@@ -1,68 +1,59 @@
-# Prescribed Resources
+# Prescribed Books
 
-Effective algorithm design requires both a solid theoretical foundation and practical "war stories." These are the books that will guide you.
+## Required Textbooks
 
----
+### Primary Textbook: The Algorithm Design Manual
+**Author**: Steven S. Skiena  
+**Edition**: 3rd Edition
 
-## Primary Textbook
-
-{% flex %}
-{% left %}
 ![The Algorithm Design Manual](Skiena.png)
-{% endleft %}
 
-{% right %}
-### The Algorithm Design Manual
-**Author**: Steven S. Skiena | **Edition**: 3rd Edition
+This is your main textbook for the course. Skiena's book is known for its practical approach to algorithms.
 
-This is your main textbook. Skiena’s approach is famous for being "practitioner-first," focusing on how to actually solve problems rather than just proving theorems.
-
-**Why we use it:**
-* **War Stories:** Real-world examples of algorithmic triumphs and failures.
-* **The Hitchhiker's Guide to Algorithms:** A massive catalog of problems and their solutions.
-* **Clarity:** Complex topics made accessible for engineering students.
-{% endright %}
-{% endflex %}
+**Key Features**:
+- Clear explanations of algorithmic concepts
+- Real-world applications and case studies
+- Excellent problem-solving strategies
+- Comprehensive coverage of data structures and algorithms
 
 ---
 
-## Reference Resource
+### Reference Book: Beginning C
+**Author**: Ivor Horton  
+**Edition**: 2013
 
-{% flex %}
-{% left %}
 ![Beginning C](C.png)
-{% endleft %}
 
-{% right %}
-### Beginning C
-**Author**: Ivor Horton | **Edition**: 2013
+While this module has transitioned to Python, this C reference book is still valuable for:
+- Understanding algorithmic concepts from a different perspective
+- Students with C background who want to compare approaches
+- Additional examples and exercises
 
-Although we have moved to Python, this book remains a high-quality reference for students interested in low-level implementation.
-
-{% hint style="info" %}
-**Contextual Use**
-This is **purely optional**. Use this if you want to see how Python's high-level structures (like lists) actually work under the hood in a memory-managed language like C.
-{% endhint %}
-{% endright %}
-{% endflex %}
+**Note**: You do **not** need to learn C for this course. This is purely a reference resource.
 
 ---
 
-## Study Mapping
+## How to Use These Books
 
-Use this table to align your reading with the lecture schedule.
+### Primary Study Resource: Skiena
+- Follow along with the units in this GitBook
+- Use Skiena for deeper explanations and additional examples
+- Work through the exercises at the end of each chapter
+- Pay special attention to the "War Stories" sections
+
+### Chapter Mapping to Study Units
 
 | Study Unit | Skiena Chapters | Topics Covered |
-| :--- | :--- | :--- |
-| **Unit 1** | *TBA* | *Coming soon* |
-| **Unit 2** | *TBA* | *Coming soon* |
-| **Unit 3** | *TBA* | *Coming soon* |
-| **Unit 4** | *TBA* | *Coming soon* |
-| **Unit 5** | *TBA* | *Coming soon* |
+|------------|-----------------|----------------|
+| Unit 1     | *TBA*          | *Coming soon*  |
+| Unit 2     | *TBA*          | *Coming soon*  |
+| Unit 3     | *TBA*          | *Coming soon*  |
+| Unit 4     | *TBA*          | *Coming soon*  |
+| Unit 5     | *TBA*          | *Coming soon*  |
+
+*Chapter mappings will be added as each unit is released.*
+
 
 ---
 
-{% hint style="success" %}
-**Ready to get your environment ready?**
-[Set up your IDE (PyCharm or VSCode) →](ide-setup/)
-{% endhint %}
+**Next**: [Set up your IDE](ide-setup/) →
