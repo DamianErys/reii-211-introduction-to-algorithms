@@ -1,65 +1,86 @@
-# REII 211: Introduction to Algorithms
 
+![Banner](Banner.jpg)
+
+# REII 211: Introduction to Algorithms
 **North-West University | Faculty of Engineering**
 
----
 
-## About This Course
-
+{% hint style="info" %}
+### Course Overview
 Welcome to REII 211! This course introduces you to the fundamental concepts of algorithms and their analysis. You'll learn how to design, analyze, and implement efficient algorithms to solve computational problems.
+{% endhint %}
 
-### Important Update: C → Python Transition
-
+{% hint style="warning" %}
+**Important Update: C → Python Transition**
 This module has recently transitioned from C to Python (as of 2025). We've prepared a Python onramp to ensure all students are ready, regardless of their prior programming experience.
+{% endhint %}
 
 ---
 
 ## What's Inside
 
-### 1. Welcome and Introduction
-Get started with the course, set up your development environment, and complete the Python onramp to ensure you're ready for computational thinking in Python.
+{% content-ref url="__welcome-and-introduction/" %}
+[Welcome and Introduction](__welcome-and-introduction/)
+{% endcontent-ref %}
 
-### 2. Study Units (1-5)
-Core content covering the fundamental algorithms and data structures you need to master.
+{% grid %}
+{% content-ref url="study-units/" %}
+[Study Units (1-5)](study-units/)
+{% endcontent-ref %}
 
-### 3. Additional Content
-For curious learners who want to explore beyond the syllabus. Algorithm visualizations, interesting applications, and more.
+{% content-ref url="learning-materials/" %}
+[Learning Materials](learning-materials/)
+{% endcontent-ref %}
 
-### 4. Learning Materials
-Everything you need to succeed:
-- Exam preparation guides
-- Past papers with solutions
-- Links to extra classes and resources
+{% content-ref url="assignments/" %}
+[Practical Assignments](assignments/)
+{% endcontent-ref %}
 
-### 5. Practical Assignments
-The module's practical assignments.
+{% content-ref url="additional-content/" %}
+[Additional Content](additional-content/)
+{% endcontent-ref %}
+{% endgrid %}
 
 ---
 
 ## Getting Started
 
-1. **Set up your IDE** - Choose between PyCharm or VSCode
-2. **Complete the Python Onramp** - Get comfortable with Python basics
-3. **Work through the study units** - Master algorithms one unit at a time
+{% tabs %}
+{% tab title="1. Set up your IDE" %}
+Choose between **PyCharm** or **VSCode**. Ensure you have the Python 3.10+ interpreter installed and configured.
+{% endtab %}
+
+{% tab title="2. Python Onramp" %}
+Complete the introductory exercises to get comfortable with Python syntax, specifically lists, dictionaries, and loops.
+{% endtab %}
+
+{% tab title="3. Study Units" %}
+Follow the chronological path through the study units to master algorithms one step at a time.
+{% endtab %}
+{% endtabs %}
 
 ---
 
 ## Learning Philosophy
 
-> **Understanding over syntax**: This course focuses on computational thinking and problem-solving. Understanding *how* and *why* algorithms work is more important than memorizing complex syntax. Use tools like AI assistants wisely - they can help with code, but the algorithmic insight must be yours.
+{% hint style="success" %}
+**Understanding over syntax**
+This course focuses on computational thinking and problem-solving. Understanding *how* and *why* algorithms work is more important than memorizing complex syntax. Use tools like AI assistants wisely — the algorithmic insight must be yours.
+{% endhint %}
 
 ---
 
 ## About This GitBook
 
-This is a living document that will grow and improve throughout the semester and beyond. It's designed to serve students for years to come.
+This is a living document that will grow and improve throughout the semester.
 
-**Status**: Active Development - New content added regularly!
+**Status**: `Active Development` - New content added regularly!
 
-**NOTE** Efundi will still be used for gradebook, communication and submission - gitbook will be used for information only!
+{% hint style="danger" %}
+**Note**: **Efundi** remains the official platform for the gradebook, formal communication, and assignment submissions. This GitBook is for instructional content only.
+{% endhint %}
 
 ---
 
-Let's dive in! Start with the [Welcome and Introduction](welcome-and-introduction/) section.
-
-Happy learning!
+**Ready to Begin?**
+[Start with the Welcome and Introduction section →](__welcome-and-introduction/)
