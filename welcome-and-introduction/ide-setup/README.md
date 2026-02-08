@@ -7,31 +7,22 @@ Before we dive into algorithms, you need to set up your environment. We have two
 
 ## 1. Choose Your IDE
 
-{% grid %}
-{% content-ref url="https://www.jetbrains.com/pycharm/" %}
-[**Option A: PyCharm** (Pro-Grade)](https://www.jetbrains.com/pycharm/)
-{% endcontent-ref %}
 
-{% content-ref url="https://code.visualstudio.com/" %}
-[**Option B: VSCode** (Highly Recommended)](https://code.visualstudio.com/)
-{% endcontent-ref %}
-{% endgrid %}
+### Option A: PyCharm (Pro-Grade)
+[https://www.jetbrains.com/pycharm/](https://www.jetbrains.com/pycharm/)
 
-{% flex %}
-{% left %}
-**PyCharm (Student Edition)**
-* Purpose-built for Python.
-* Industry-leading debugger.
-* Free with your university email.
-{% endleft %}
+### Option B: VSCode (Highly Recommended)
+[https://code.visualstudio.com/](https://code.visualstudio.com/)
 
-{% right %}
-**Visual Studio Code**
-* Lightweight and fast.
-* The "Swiss Army Knife" of editors.
-* Preferred for this module.
-{% endright %}
-{% endflex %}
+---
+
+## Comparison
+
+| **PyCharm (Student Edition)** | **Visual Studio Code** |
+|------------------------------|-------------------------|
+| Purpose-built for Python     | Lightweight and fast    |
+| Industry-leading debugger    | The “Swiss Army Knife” of editors |
+| Free with your university email | Preferred for this module |
 
 ---
 
@@ -96,6 +87,10 @@ Open VSCode and press `Ctrl+Shift+X` to open the Extensions marketplace. Install
 
 ---
 
+Here you go — the full response rewritten **purely in Markdown**, clean and ready to paste into GitBook.
+
+---
+
 ## 4. Verification: Hello World
 
 To ensure everything is working, create a file named `hello.py` and paste the following:
@@ -104,8 +99,53 @@ To ensure everything is working, create a file named `hello.py` and paste the fo
 print("Hello world!\n")
 print("Name: YOUR_NAME_HERE")
 print("Student Number: YOUR_STUDENT_NUMBER_HERE")
-
 ```
+
+---
+
+## How to Create a New File (Beginner‑Friendly)
+
+Here are the simplest and more detailed methods.
+
+### **Fastest Method (Works in Most Editors)**
+
+**Keyboard shortcut:**  
+- **Ctrl + N** → create a new file  
+- **Ctrl + S** → save it as `hello.py`
+
+This is the quickest, universal method.
+
+---
+
+## Creating a New File in VS Code
+
+### **Method 1: Using the Explorer Panel**
+1. Open VS Code  
+2. Click the **Explorer** icon on the left  
+3. Click **New File**  
+4. Type `hello.py`  
+5. Paste the code and save
+
+### **Method 2: Using the Menu**
+1. **File → New Text File**  
+2. Paste the code  
+3. **File → Save As…**  
+4. Name it `hello.py`
+
+---
+
+## Creating a New File in PyCharm
+
+### **Method 1: Right‑Click Method**
+1. In the **Project** panel, right‑click the folder where you want the file  
+2. Select **New → Python File**  
+3. Enter `hello` (PyCharm adds `.py` automatically)  
+4. Paste the code
+
+### **Method 2: Menu Method**
+1. **File → New… → Python File**  
+2. Name it `hello`  
+3. Paste the code
 
 **To Run:** Click the **Play Button** in the top-right corner. If prompted, select the "Recommended" Python Interpreter.
 

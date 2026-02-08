@@ -17,32 +17,6 @@ This module has recently transitioned from C to Python (as of 2025). We've prepa
 
 ---
 
-## What's Inside
-
-{% content-ref url="__welcome-and-introduction/" %}
-[Welcome and Introduction](__welcome-and-introduction/)
-{% endcontent-ref %}
-
-{% grid %}
-{% content-ref url="study-units/" %}
-[Study Units (1-5)](study-units/)
-{% endcontent-ref %}
-
-{% content-ref url="learning-materials/" %}
-[Learning Materials](learning-materials/)
-{% endcontent-ref %}
-
-{% content-ref url="assignments/" %}
-[Practical Assignments](assignments/)
-{% endcontent-ref %}
-
-{% content-ref url="additional-content/" %}
-[Additional Content](additional-content/)
-{% endcontent-ref %}
-{% endgrid %}
-
----
-
 ## Getting Started
 
 {% tabs %}
@@ -83,4 +57,4 @@ This is a living document that will grow and improve throughout the semester.
 ---
 
 **Ready to Begin?**
-[Start with the Welcome and Introduction section →](__welcome-and-introduction/)
+[Start with the Welcome and Introduction section →](welcome-and-introduction/)
