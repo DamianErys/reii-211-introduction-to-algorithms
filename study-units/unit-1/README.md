@@ -2,51 +2,28 @@
 
 ## Overview
 
-Welcome to Unit 1! This unit introduces fundamental concepts in algorithm design based on Chapter 1 of Skiena's "The Algorithm Design Manual." You'll learn how to think algorithmically, reason about correctness, and model real-world problems.
+This unit introduces the core ideas of algorithm design by studying simple but fundamental problems. It is based on Chapter 1 of Skiena’s **The Algorithm Design Manual**.
 
-## Learning Objectives
+Algorithm design is a practical skill, not just a theoretical topic. It is concerned with creating procedures that are **correct**, **reliable**, and **general**, rather than ad-hoc solutions that work only in specific cases. A key theme of this unit is the distinction between **algorithms** and **heuristics**, and why this distinction matters in real software systems.
 
-By the end of this unit, you should be able to:
+By the end of this unit, you should be able to reason clearly about what a problem is, what a solution requires, and whether a proposed algorithm truly solves it.
 
-- Understand the fundamentals of algorithm design
-- Apply greedy algorithm strategies
-- Reason formally about algorithm correctness
-- Use induction and recursion as problem-solving tools
-- Model real-world problems mathematically
-- Construct proofs by contradiction
+## What Is an Algorithm?
 
-## Sections
+An algorithm is a precisely defined procedure for solving a problem. For a procedure to qualify as an algorithm, it must satisfy all of the following:
 
-This unit covers six key topics from Skiena's Chapter 1:
+1. It accepts any input from a clearly defined set of valid inputs  
+2. It produces an output that satisfies the problem requirements  
+3. It always terminates after a finite number of steps  
+4. It is correct for **every** valid input, not just typical cases  
 
-1. **[Robot Tour Optimization](sections/1-robot-tour-optimization.md)**  
-   Introduction to the traveling salesman problem and algorithmic thinking
+An algorithm is therefore more than a piece of code that “seems to work”. Correctness must be guaranteed by design.
 
-2. **[Selecting the Right Jobs](sections/2-selecting-the-right-jobs.md)**  
-   Greedy algorithms and interval scheduling
+## Problem Specification
 
-3. **[Reasoning about Correctness](sections/3-reasoning-about-correctness.md)**  
-   Formal methods for verifying algorithm correctness
+Every algorithmic problem must be defined using two parts:
 
-4. **[Induction and Recursion](sections/4-induction-and-recursion.md)**  
-   Mathematical induction and recursive problem solving
+* **Input specification** – what inputs are allowed  
+* **Output specification** – what properties the output must satisfy  
 
-5. **[Modeling the Problem](sections/5-modeling-the-problem.md)**  
-   Translating real-world problems into algorithmic models
-
-6. **[Proof by Contradiction](sections/6-proof-by-contradiction.md)**  
-   Using contradiction to establish correctness and impossibility
-
-## Getting Started
-
-Start with [Section 1: Robot Tour Optimization](sections/1-robot-tour-optimization.md) and work through each section sequentially. Each section builds on concepts from previous ones.
-
-## Resources
-
-- **Textbook:** Skiena, Chapter 1 - Introduction to Algorithm Design
-- **Practice Problems:** Available in each section
-- **Code Examples:** Python implementations provided throughout
-
----
-
-**Ready to begin?** → [Start with Robot Tour Optimization](sections/1-robot-tour-optimization.md)
+Without a precise problem specification, it is impossible to prove correctness or to compare different solutions. Much of algorithm design is therefore about understanding and modelling the problem correctly before attempting to solve it.
