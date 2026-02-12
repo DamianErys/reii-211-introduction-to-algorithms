@@ -22,7 +22,7 @@ If assuming something is false leads to an impossible conclusion, the original s
 
 **Step 1: Assume the opposite**
 
-Suppose there are only finitely many primes. Call them $p_1, p_2, \ldots, p_m$ where $m$ is some fixed number.
+Suppose there are only finitely many primes. Call them $$p_1, p_2, \ldots, p_m$$ where $$m$$ is some fixed number.
 
 **Step 2: Follow the logic**
 
@@ -30,18 +30,18 @@ Construct a new number by multiplying all known primes together:
 
 $$N = \prod_{i=1}^{m} p_i = p_1 \times p_2 \times \cdots \times p_m$$
 
-By construction, $N$ is divisible by every prime in our list.
+By construction, $$N$$ is divisible by every prime in our list.
 
 Now consider $N + 1$:
-- Is it divisible by $p_1 = 2$? No—because $N$ is divisible by 2, so $N+1$ leaves remainder 1
-- Is it divisible by $p_2 = 3$? No—same reasoning
-- Is it divisible by any $p_i$? No—same reasoning for all of them
+- Is it divisible by $$p_1 = 2$$? No—because $$N$$ is divisible by 2, so $$N+1$$ leaves remainder 1
+- Is it divisible by $$p_2 = 3$$? No—same reasoning
+- Is it divisible by any $$p_i$$? No—same reasoning for all of them
 
 **Step 3: Find the absurdity**
 
-Since $N+1$ has no factors from our "complete" list of primes, either:
-- $N+1$ is itself prime, OR
-- $N+1$ has a prime factor not in our list
+Since $$N+1$$ has no factors from our "complete" list of primes, either:
+- $$N+1$$ is itself prime, OR
+- $$N+1$$ has a prime factor not in our list
 
 Either way, we've found a prime not in $\{p_1, \ldots, p_m\}$—contradicting our assumption that the list was complete.
 
