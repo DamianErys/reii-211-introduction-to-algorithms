@@ -13,7 +13,7 @@ The tool allows you to:
 
 To open the Heuristics Playground, click the link below:
 
-**[Open Heuristics Playground](index.html)**
+**[Open Heuristics Playground](https://damianerys.github.io/reii-211-introduction-to-algorithms/additional-content/visualizations/Heuristics/index.html)**
 
 The visualization runs entirely on the client side.  
 No internet connection or additional setup is required.
