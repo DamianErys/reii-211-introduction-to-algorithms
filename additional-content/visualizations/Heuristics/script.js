@@ -1,14 +1,14 @@
 const canvas = document.getElementById("plane");
 const ctx = canvas.getContext("2d");
 
-const SIZE = 100;
-const SCALE = 550 / (2 * SIZE);
+const SIZE = 100;         
+const DISPLAY_SIZE = 105; 
+const SCALE = 580 / (2 * DISPLAY_SIZE); 
 
 let points = [];
-let lines = [];
-let allSteps = [];
-let currentStep = 0;
-
+let lines = [];  
+let allSteps = []; 
+let currentStep = 0;  
 
 function toCanvas(x, y) {
     return {
@@ -42,11 +42,20 @@ function drawAxes() {
 function drawPoints() {
     ctx.fillStyle = "black";
 
-    for (const p of points) {
+    for (let i = 0; i < points.length; i++) {
+        const p = points[i];
         const c = toCanvas(p.x, p.y);
+        
         ctx.beginPath();
         ctx.arc(c.x, c.y, 4, 0, Math.PI * 2);
         ctx.fill();
+        
+        ctx.font = "10px Arial";
+        ctx.fillStyle = "#666";
+        const label = `(${i + 1})`;
+        const metrics = ctx.measureText(label);
+        ctx.fillText(label, c.x - metrics.width / 2, c.y + 14);
+        ctx.fillStyle = "black";
     }
 }
 
@@ -106,7 +115,7 @@ function updateStepButtons() {
 
 let mouseDownTime = 0;
 let mouseDownPos = null;
-const HOLD_DURATION = 500;
+const HOLD_DURATION = 500; 
 
 canvas.addEventListener("mousedown", (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -182,6 +191,7 @@ canvas.addEventListener("mouseleave", () => {
     document.getElementById("coordDisplay").textContent = "";
 });
 
+
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -195,6 +205,7 @@ document.getElementById("generateBtn").addEventListener("click", () => {
     selectedAlgorithm = null;
     document.getElementById("nnBtn").classList.remove("selected");
     document.getElementById("cpBtn").classList.remove("selected");
+    document.getElementById("nnOptions").style.display = "none";
 
     for (let i = 0; i < n; i++) {
         points.push({
@@ -213,6 +224,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
     selectedAlgorithm = null;
     document.getElementById("nnBtn").classList.remove("selected");
     document.getElementById("cpBtn").classList.remove("selected");
+    document.getElementById("nnOptions").style.display = "none";
     redraw();
 });
 
@@ -224,13 +236,16 @@ document.getElementById("clearBtn").addEventListener("click", () => {
     selectedAlgorithm = null;
     document.getElementById("nnBtn").classList.remove("selected");
     document.getElementById("cpBtn").classList.remove("selected");
+    document.getElementById("nnOptions").style.display = "none";
     redraw();
 });
+
 
 document.getElementById("visualiseCheck").addEventListener("change", (e) => {
     const stepControls = document.getElementById("stepControls");
     stepControls.style.display = e.target.checked ? "block" : "none";
 });
+
 
 function distance(p1, p2) {
     const dx = p2.x - p1.x;
@@ -238,17 +253,22 @@ function distance(p1, p2) {
     return Math.sqrt(dx * dx + dy * dy);
 }
 
-function nearestNeighbor() {
+function nearestNeighbor(startNodeIndex = 0) {
     if (points.length < 2) {
         alert("Need at least 2 points");
         return;
     }
 
+    if (startNodeIndex < 0 || startNodeIndex >= points.length) {
+        alert(`Invalid start node. Must be between 1 and ${points.length}`);
+        return;
+    }
+
     const steps = [];
     const visited = new Set();
-    const start = points[0];
+    const start = points[startNodeIndex];
     let current = start;
-    visited.add(0);
+    visited.add(startNodeIndex);
     let order = 1;
 
     while (visited.size < points.length) {
@@ -356,7 +376,7 @@ function wouldCreateCycle(i, j, connections) {
         const current = queue.shift();
         
         for (const neighbor of connections[current]) {
-            if (neighbor === j) return true;
+            if (neighbor === j) return true; 
             if (!visited.has(neighbor)) {
                 visited.add(neighbor);
                 queue.push(neighbor);
@@ -367,12 +387,19 @@ function wouldCreateCycle(i, j, connections) {
     return false;
 }
 
+
 let selectedAlgorithm = null;
 
 document.getElementById("nnBtn").addEventListener("click", () => {
-    const visualise = document.getElementById("visualiseCheck").checked;
-    const steps = nearestNeighbor();
+    const nnOptions = document.getElementById("nnOptions");
+    nnOptions.style.display = "block";
     
+    const startNodeInput = document.getElementById("nnStartNode");
+    const startNode = parseInt(startNodeInput.value, 10) - 1; 
+    const visualise = document.getElementById("visualiseCheck").checked;
+    const steps = nearestNeighbor(startNode);
+    
+    if (!steps) return; 
     selectedAlgorithm = 'nn';
     document.getElementById("nnBtn").classList.add("selected");
     document.getElementById("cpBtn").classList.remove("selected");
@@ -389,6 +416,8 @@ document.getElementById("nnBtn").addEventListener("click", () => {
 });
 
 document.getElementById("cpBtn").addEventListener("click", () => {
+    document.getElementById("nnOptions").style.display = "none";
+    
     const visualise = document.getElementById("visualiseCheck").checked;
     const steps = closestPair();
     

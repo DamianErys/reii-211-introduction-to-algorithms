@@ -23,6 +23,12 @@
         <div class="control-group">
             <h3>Algorithms</h3>
             <button id="nnBtn" class="algo-btn">Nearest Neighbor</button>
+            <div id="nnOptions" style="display: none; margin-top: 8px;">
+                <label style="font-size: 12px;">
+                    Start node:
+                    <input type="number" id="nnStartNode" value="1" min="1" style="width: 60px;">
+                </label>
+            </div>
             <button id="cpBtn" class="algo-btn">Closest Pair</button>
         </div>
 
@@ -47,7 +53,7 @@
 
     <div class="canvas-container">
         <div>
-            <canvas id="plane" width="550" height="550"></canvas>
+            <canvas id="plane" width="580" height="580"></canvas>
             <div class="canvas-info">
                 <p><strong>Instructions:</strong></p>
                 <p>• Click to add points • Hold 0.5s to remove • Coordinates: −100 to +100</p>
