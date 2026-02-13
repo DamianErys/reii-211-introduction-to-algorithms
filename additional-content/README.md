@@ -1,16 +1,12 @@
 # Additional Content
 
-## For the Curious Learner
+This section contains optional material designed to support and extend the core study units.
 
-This section is for those who want to go beyond the syllabus and explore the fascinating world of algorithms more deeply.
+The content here is **not examinable by default**, but it is strongly recommended for:
 
-**Currently Under Construction**
+- Practising algorithmic thinking
+- Exploring ideas visually and interactively
+- Working through extra examples and exercises
+- Building intuition beyond formal proofs
 
-### Coming Soon
-
-- Algorithm visualizations
-- Interesting algorithm applications
-- Advanced topics
-- Fun challenges and puzzles
-
-Check back soon for exciting content!
+You can treat this section as a sandbox: explore freely, experiment, and revisit it when a concept from the study units feels abstract or unclear.

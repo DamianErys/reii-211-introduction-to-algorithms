@@ -21,10 +21,13 @@
 * [Unit 3](study-units/unit-3/README.md)
 * [Unit 4](study-units/unit-4/README.md)
 * [Unit 5](study-units/unit-5/README.md)
+
 ## Additional Content
 
 * [Overview](additional-content/README.md)
 * [Algorithm Visualizations](additional-content/visualizations/README.md)
+  * [Heuristics Playground](additional-content/visualizations/Heuristics/README.md)
+
 
 ## Learning Materials
 
@@ -38,9 +41,3 @@
 * [Assignments](practical-assignments/README.md)
 
 ---
-
-## Quick Links
-
-* [Python Onramp](welcome-and-introduction/python-onramp/README.md)
-* [Exam Prep](learning-materials/exam-prep/README.md)
-* [Past Papers](learning-materials/past-papers/README.md)

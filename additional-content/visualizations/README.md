@@ -1,11 +1,18 @@
 # Algorithm Visualizations
 
-**Under Construction**
+Algorithm visualizations are interactive, client-side tools that allow you to **see algorithms and heuristics in action**.
 
-Interactive visualizations to help you understand how algorithms work will appear here!
+These visualizations are intended to help you:
 
-Stay tuned for:
-- Sorting algorithm animations
-- Search algorithm demonstrations
-- Graph traversal visualizations
-- And more!
+- Develop intuition for how algorithms behave
+- Observe the effect of different inputs and parameters
+- Experiment without worrying about implementation details
+
+All tools in this section run entirely in your browser. No installation or online services are required.
+
+## Available Visualizations
+
+- **Heuristics Playground**  
+  An interactive plane where you can place points and explore heuristic-based reasoning and optimisation strategies.
+
+Use these tools alongside the study units, not as a replacement for them.
