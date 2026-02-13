@@ -1,14 +1,15 @@
 const canvas = document.getElementById("plane");
 const ctx = canvas.getContext("2d");
 
-const SIZE = 100;         
-const DISPLAY_SIZE = 105; 
-const SCALE = 580 / (2 * DISPLAY_SIZE); 
+const SIZE = 100;          
+const DISPLAY_SIZE = 105;  
+const SCALE = 580 / (2 * DISPLAY_SIZE);  
 
 let points = [];
 let lines = [];  
-let allSteps = []; 
+let allSteps = [];  
 let currentStep = 0;  
+
 
 function toCanvas(x, y) {
     return {
@@ -23,6 +24,7 @@ function toWorld(cx, cy) {
         y: Math.round((canvas.height / 2 - cy) / SCALE)
     };
 }
+
 
 function drawAxes() {
     ctx.strokeStyle = "#aaa";
@@ -46,9 +48,11 @@ function drawPoints() {
         const p = points[i];
         const c = toCanvas(p.x, p.y);
         
+        
         ctx.beginPath();
         ctx.arc(c.x, c.y, 4, 0, Math.PI * 2);
         ctx.fill();
+        
         
         ctx.font = "10px Arial";
         ctx.fillStyle = "#666";
@@ -69,11 +73,13 @@ function drawLines() {
         const from = toCanvas(line.from.x, line.from.y);
         const to = toCanvas(line.to.x, line.to.y);
 
+        
         ctx.beginPath();
         ctx.moveTo(from.x, from.y);
         ctx.lineTo(to.x, to.y);
         ctx.stroke();
 
+        
         const midX = (from.x + to.x) / 2;
         const midY = (from.y + to.y) / 2;
         ctx.fillText(line.order.toString(), midX + 5, midY - 5);
@@ -108,6 +114,7 @@ function updateStepButtons() {
     const backBtn = document.getElementById("stepBackBtn");
     const forwardBtn = document.getElementById("stepForwardBtn");
     
+    
     backBtn.disabled = allSteps.length === 0 || currentStep === 0;
     forwardBtn.disabled = allSteps.length === 0 || currentStep >= allSteps.length;
 }
@@ -133,11 +140,13 @@ canvas.addEventListener("mouseup", (e) => {
     
     const holdTime = Date.now() - mouseDownTime;
     
+    
     const moved = mouseDownPos && 
                   (Math.abs(cx - mouseDownPos.cx) > 5 || 
                    Math.abs(cy - mouseDownPos.cy) > 5);
     
     if (holdTime >= HOLD_DURATION && !moved) {
+        
         const p = toWorld(cx, cy);
         
         for (let i = 0; i < points.length; i++) {
@@ -157,6 +166,7 @@ canvas.addEventListener("mouseup", (e) => {
             }
         }
     } else if (holdTime < HOLD_DURATION && !moved) {
+        
         const p = toWorld(cx, cy);
         if (Math.abs(p.x) <= SIZE && Math.abs(p.y) <= SIZE) {
             points.push(p);
@@ -169,6 +179,7 @@ canvas.addEventListener("mouseup", (e) => {
 });
 
 canvas.addEventListener("click", (e) => {
+    
     e.preventDefault();
 });
 
@@ -259,11 +270,6 @@ function nearestNeighbor(startNodeIndex = 0) {
         return;
     }
 
-    if (startNodeIndex < 0 || startNodeIndex >= points.length) {
-        alert(`Invalid start node. Must be between 1 and ${points.length}`);
-        return;
-    }
-
     const steps = [];
     const visited = new Set();
     const start = points[startNodeIndex];
@@ -296,6 +302,7 @@ function nearestNeighbor(startNodeIndex = 0) {
         }
     }
 
+    
     steps.push({
         from: current,
         to: start,
@@ -368,6 +375,8 @@ function closestPair() {
 }
 
 function wouldCreateCycle(i, j, connections) {
+    
+    
     const visited = new Set();
     const queue = [i];
     visited.add(i);
@@ -391,15 +400,45 @@ function wouldCreateCycle(i, j, connections) {
 let selectedAlgorithm = null;
 
 document.getElementById("nnBtn").addEventListener("click", () => {
+    
+    if (points.length === 0) {
+        const n = parseInt(document.getElementById("numPoints").value, 10);
+        for (let i = 0; i < n; i++) {
+            points.push({
+                x: randomInt(-SIZE, SIZE),
+                y: randomInt(-SIZE, SIZE)
+            });
+        }
+        redraw();
+    }
+    
+    if (points.length < 2) {
+        alert("Need at least 2 points");
+        return;
+    }
+    
+    
     const nnOptions = document.getElementById("nnOptions");
     nnOptions.style.display = "block";
     
     const startNodeInput = document.getElementById("nnStartNode");
-    const startNode = parseInt(startNodeInput.value, 10) - 1; 
+    startNodeInput.max = points.length;
+    
+    
+    let startNodeValue = parseInt(startNodeInput.value, 10);
+    if (startNodeValue > points.length) {
+        startNodeValue = 1;
+        startNodeInput.value = 1;
+    }
+    
+    const startNode = startNodeValue - 1; 
+    
     const visualise = document.getElementById("visualiseCheck").checked;
     const steps = nearestNeighbor(startNode);
     
     if (!steps) return; 
+    
+    
     selectedAlgorithm = 'nn';
     document.getElementById("nnBtn").classList.add("selected");
     document.getElementById("cpBtn").classList.remove("selected");
@@ -415,11 +454,53 @@ document.getElementById("nnBtn").addEventListener("click", () => {
     }
 });
 
+
+document.getElementById("nnStartNode").addEventListener("input", () => {
+    if (selectedAlgorithm === 'nn') {
+        const startNode = parseInt(document.getElementById("nnStartNode").value, 10) - 1;
+        const visualise = document.getElementById("visualiseCheck").checked;
+        const steps = nearestNeighbor(startNode);
+        
+        if (!steps) return;
+        
+        if (!visualise) {
+            
+            lines = steps;
+            redraw();
+        } else {
+            
+            allSteps = steps;
+            currentStep = 0;
+            lines = [];
+            redraw();
+        }
+    }
+});
+
 document.getElementById("cpBtn").addEventListener("click", () => {
+    
+    if (points.length === 0) {
+        const n = parseInt(document.getElementById("numPoints").value, 10);
+        for (let i = 0; i < n; i++) {
+            points.push({
+                x: randomInt(-SIZE, SIZE),
+                y: randomInt(-SIZE, SIZE)
+            });
+        }
+        redraw();
+    }
+    
+    if (points.length < 2) {
+        alert("Need at least 2 points");
+        return;
+    }
+    
+    
     document.getElementById("nnOptions").style.display = "none";
     
     const visualise = document.getElementById("visualiseCheck").checked;
     const steps = closestPair();
+    
     
     selectedAlgorithm = 'cp';
     document.getElementById("cpBtn").classList.add("selected");
@@ -451,5 +532,6 @@ document.getElementById("stepForwardBtn").addEventListener("click", () => {
         redraw();
     }
 });
+
 
 redraw();
