@@ -90,7 +90,8 @@ function generateJobs() {
             // Try to place a job that doesn't overlap with existing jobs in this studio
             while (attempts < 50 && !validJob) {
                 const start = Math.floor(Math.random() * (timeSpan - 1));
-                const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 3));
+                // Shorter durations to create more gaps - max 1/5 of timespan
+                const maxDuration = Math.min(timeSpan - start, Math.max(2, Math.floor(timeSpan / 5)));
                 const duration = Math.floor(Math.random() * Math.max(1, maxDuration - 1)) + 1;
                 const end = start + duration;
                 
@@ -232,12 +233,12 @@ function drawJob(job, y, height, timeSpan, color) {
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, width, height);
     
-    // Draw job label
+    // Draw job number only (no "Job" text)
     ctx.fillStyle = 'white';
-    ctx.font = '12px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`Job ${job.id}`, x + width / 2, y + height / 2);
+    ctx.fillText(job.id, x + width / 2, y + height / 2);
 }
 
 // Run selected algorithm
