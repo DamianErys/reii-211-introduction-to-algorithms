@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scheduling Heuristics Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h2>Scheduling Heuristics – Film Job Scheduler</h2>
+<div class="container">
+    <div class="controls">
+        <div class="control-group">
+            <h3>Generate Jobs</h3>
+            <label>
+                Number of films:
+                <input type="number" id="numJobs" value="10" min="1" max="50">
+            </label>
+            <label>
+                Time span (months):
+                <input type="number" id="timeSpan" value="12" min="6" max="24">
+            </label>
+            <button id="generateBtn">Generate Jobs</button>
+        </div>
+        <div class="control-group">
+            <h3>Scheduling Heuristics</h3>
+            <button id="earliestStartBtn" class="algo-btn">Earliest Start Time</button>
+            <button id="shortestJobBtn" class="algo-btn">Shortest Job First</button>
+            <button id="earliestFinishBtn" class="algo-btn">Earliest Finish Time</button>
+        </div>
+        <div class="control-group">
+            <h3>Visualization</h3>
+            <label>
+                <input type="checkbox" id="visualiseCheck">
+                Step-by-step mode
+            </label>
+            <div id="stepControls" style="display: none;">
+                <button id="stepBackBtn">← Back</button>
+                <button id="stepForwardBtn">Forward →</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <h3>Actions</h3>
+            <button id="resetBtn">Reset Selection</button>
+            <button id="clearBtn">Clear All</button>
+        </div>
+    </div>
+    <div class="canvas-container">
+        <div>
+            <canvas id="plane" width="700" height="500"></canvas>
+            <div class="canvas-info">
+                <p><strong>Film Scheduling Problem:</strong></p>
+                <p>• Each bar represents a film with start and end dates</p>
+                <p>• You can only work on one film at a time</p>
+                <p>• Goal: Maximize total number of jobs accepted</p>
+                <p>• Green = Selected • Red = Rejected • Gray = Available</p>
+            </div>
+        </div>
+    </div>
+    <div class="right-panel">
+        <div class="info-box">
+            <span id="distanceLabel">Jobs Selected: 0</span>
+        </div>
+        <div class="info-box">
+            <p id="coordDisplay">Click "Generate Jobs" to start</p>
+        </div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
