@@ -89,18 +89,19 @@ function generateJobs() {
             
             // Try to place a job that doesn't overlap with existing jobs in this studio
             while (attempts < 50 && !validJob) {
-                const start = Math.floor(Math.random() * (timeSpan - 1));
-                // Shorter durations to create more gaps - max 1/5 of timespan
-                const maxDuration = Math.min(timeSpan - start, Math.max(2, Math.floor(timeSpan / 5)));
-                const duration = Math.floor(Math.random() * Math.max(1, maxDuration - 1)) + 1;
+                // Use decimal values for more randomness
+                const start = Math.random() * (timeSpan - 1);
+                // Shorter durations - between 0.5 and timeSpan/5
+                const maxDuration = Math.max(0.5, Math.min(timeSpan - start, timeSpan / 5));
+                const duration = Math.random() * (maxDuration - 0.5) + 0.5;
                 const end = start + duration;
                 
-                // Check if this job overlaps with any existing job in this studio
-                const overlaps = studioJobs.some(existingJob => 
-                    (start < existingJob.end && end > existingJob.start)
+                // Check if this job has at least 0.5 month gap with any existing job in this studio
+                const hasGap = studioJobs.every(existingJob => 
+                    (start >= existingJob.end + 0.5 || end <= existingJob.start - 0.5)
                 );
                 
-                if (!overlaps) {
+                if (hasGap) {
                     validJob = {
                         id: jobId++,
                         start: start,
