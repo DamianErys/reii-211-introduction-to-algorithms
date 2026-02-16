@@ -69,3 +69,29 @@
 <script src="script.js"></script>
 </body>
 </html>
+
+
+<!-- When you run this visualization, you might notice something interesting: the "Earliest Start Time" heuristic often results in a higher 
+percentage of the total time span being covered by the selected jobs, even though it doesn't always select the maximum number of jobs. 
+On the other hand, the "Earliest Finish Time" heuristic tends to select more jobs but may cover less of the total time span.
+
+The textbook isn't wrong, but there's a subtle but important difference between what we're measuring and what the algorithm optimizes for.
+The Key Distinction:
+
+Skiena's algorithm optimizes for: Maximum NUMBER of jobs
+Our metric measures: Maximum TIME coverage (percentage of total timespan)
+
+These are actually different objectives!
+Why Earliest Start Time gives higher coverage:
+Earliest Start Time tends to select jobs that start early, which often means:
+
+It might pick longer jobs that start earlier
+It fills up the beginning of the timeline more densely
+Even if it selects fewer total jobs, those jobs might be longer in duration
+
+Why Earliest Finish Time gives more jobs:
+Earliest Finish Time is provably optimal for maximizing job COUNT because:
+
+It picks jobs that finish quickly, leaving more time for additional jobs
+It might select many short jobs rather than fewer long ones
+More jobs selected ≠ more time covered -->
