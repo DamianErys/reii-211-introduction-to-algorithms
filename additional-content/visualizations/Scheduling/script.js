@@ -3,7 +3,7 @@ const canvas = document.getElementById('plane');
 const ctx = canvas.getContext('2d');
 
 // UI Elements
-const numJobsInput = document.getElementById('numJobs');
+const numStudiosInput = document.getElementById('numStudios');
 const timeSpanInput = document.getElementById('timeSpan');
 const generateBtn = document.getElementById('generateBtn');
 const earliestStartBtn = document.getElementById('earliestStartBtn');
@@ -68,31 +68,56 @@ function toggleStepMode() {
     }
 }
 
-// Generate random jobs across random studios
+// Generate random jobs across studios (non-overlapping within each studio)
 function generateJobs() {
-    const numJobs = parseInt(numJobsInput.value); // Total number of films
+    const numStudios = parseInt(numStudiosInput.value);
     const timeSpan = parseInt(timeSpanInput.value);
     
-    // Determine number of studios (rows) - random between 3 and 8
-    const numStudios = Math.floor(Math.random() * 6) + 3;
-    
     jobs = [];
+    let jobId = 1;
     
-    // Distribute jobs randomly across studios
-    for (let i = 0; i < numJobs; i++) {
-        const studio = Math.floor(Math.random() * numStudios);
-        const start = Math.floor(Math.random() * (timeSpan - 1));
-        const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 3)); // Max 1/3 of timespan
-        const duration = Math.floor(Math.random() * Math.max(1, maxDuration - 1)) + 1;
-        const end = start + duration;
+    // For each studio, generate a random number of non-overlapping jobs
+    for (let studio = 0; studio < numStudios; studio++) {
+        // Random number of jobs per studio (between 1 and 8)
+        const numJobsInStudio = Math.floor(Math.random() * 8) + 1;
         
-        jobs.push({
-            id: i + 1,
-            start: start,
-            end: end,
-            duration: duration,
-            studio: studio
-        });
+        // Generate random jobs for this studio
+        const studioJobs = [];
+        for (let i = 0; i < numJobsInStudio; i++) {
+            let attempts = 0;
+            let validJob = null;
+            
+            // Try to place a job that doesn't overlap with existing jobs in this studio
+            while (attempts < 50 && !validJob) {
+                const start = Math.floor(Math.random() * (timeSpan - 1));
+                const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 3));
+                const duration = Math.floor(Math.random() * Math.max(1, maxDuration - 1)) + 1;
+                const end = start + duration;
+                
+                // Check if this job overlaps with any existing job in this studio
+                const overlaps = studioJobs.some(existingJob => 
+                    (start < existingJob.end && end > existingJob.start)
+                );
+                
+                if (!overlaps) {
+                    validJob = {
+                        id: jobId++,
+                        start: start,
+                        end: end,
+                        duration: duration,
+                        studio: studio
+                    };
+                }
+                attempts++;
+            }
+            
+            if (validJob) {
+                studioJobs.push(validJob);
+            }
+        }
+        
+        // Add this studio's jobs to the main jobs array
+        jobs.push(...studioJobs);
     }
     
     // Sort by studio first, then by start time within each studio
