@@ -198,7 +198,7 @@ function drawJobs() {
     ctx.textAlign = 'right';
     for (let i = 0; i < numStudios; i++) {
         const y = startY + i * (barHeight + spacing) + barHeight / 2;
-        ctx.fillText(`Studio ${i + 1}`, PADDING - 10, y + 4);
+        ctx.fillText(`${i + 1}`, PADDING - 10, y + 4);
     }
     
     jobs.forEach(job => {
@@ -390,7 +390,7 @@ function drawVisualizationStep() {
     ctx.textAlign = 'right';
     for (let i = 0; i < numStudios; i++) {
         const y = startY + i * (barHeight + spacing) + barHeight / 2;
-        ctx.fillText(`Studio ${i + 1}`, PADDING - 10, y + 4);
+        ctx.fillText(`${i + 1}`, PADDING - 10, y + 4);
     }
     
     jobs.forEach(job => {
