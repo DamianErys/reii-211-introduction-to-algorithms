@@ -68,27 +68,34 @@ function toggleStepMode() {
     }
 }
 
-// Generate random jobs
+// Generate random jobs with random positioning
 function generateJobs() {
     const numJobs = parseInt(numJobsInput.value);
     const timeSpan = parseInt(timeSpanInput.value);
     
     jobs = [];
+    
+    // Create jobs with completely random start times and durations
     for (let i = 0; i < numJobs; i++) {
         const start = Math.floor(Math.random() * (timeSpan - 1));
-        const duration = Math.floor(Math.random() * (timeSpan - start - 1)) + 1;
+        const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 2)); // Max half the timespan
+        const duration = Math.floor(Math.random() * (maxDuration - 1)) + 1;
         const end = start + duration;
         
         jobs.push({
             id: i + 1,
             start: start,
             end: end,
-            duration: duration
+            duration: duration,
+            row: -1 // Will be assigned later
         });
     }
     
-    // Sort jobs by start time for display
-    jobs.sort((a, b) => a.start - b.start);
+    // Shuffle jobs to randomize order
+    jobs.sort(() => Math.random() - 0.5);
+    
+    // Assign rows based on which jobs can fit together
+    assignRowsToJobs();
     
     selectedJobs = [];
     visualizationSteps = [];
@@ -100,6 +107,45 @@ function generateJobs() {
     
     updateDisplay();
     drawJobs();
+}
+
+// Assign rows to jobs so multiple jobs can be on the same row if they don't overlap
+function assignRowsToJobs() {
+    // Sort jobs by start time first
+    jobs.sort((a, b) => a.start - b.start);
+    
+    const rows = [];
+    
+    jobs.forEach(job => {
+        // Try to find a row where this job fits
+        let placed = false;
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            // Check if this job can fit in this row (doesn't overlap with any job in the row)
+            const canFit = row.every(existingJob => 
+                job.start >= existingJob.end || job.end <= existingJob.start
+            );
+            
+            if (canFit) {
+                row.push(job);
+                job.row = i;
+                placed = true;
+                break;
+            }
+        }
+        
+        // If no row fits, create a new row
+        if (!placed) {
+            rows.push([job]);
+            job.row = rows.length - 1;
+        }
+    });
+    
+    // Re-shuffle the job IDs to make them truly random
+    const shuffledIds = jobs.map((_, i) => i + 1).sort(() => Math.random() - 0.5);
+    jobs.forEach((job, i) => {
+        job.id = shuffledIds[i];
+    });
 }
 
 // Draw empty canvas with axes
