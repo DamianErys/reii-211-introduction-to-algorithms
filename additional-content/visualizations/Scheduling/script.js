@@ -467,7 +467,8 @@ function clearAll() {
 
 // Update display
 function updateDisplay() {
-    distanceLabel.textContent = `Jobs Selected: ${selectedJobs.length}`;
+    const totalJobsSelected = selectedJobs.length;
+    distanceLabel.textContent = `Jobs Selected: ${totalJobsSelected}`;
     
     if (jobs.length === 0) {
         coordDisplay.textContent = 'Click "Generate Jobs" to start';
@@ -477,7 +478,13 @@ function updateDisplay() {
         const algoName = currentAlgorithm === 'earliestStart' ? 'Earliest Start' :
                         currentAlgorithm === 'shortestJob' ? 'Shortest Job' :
                         'Earliest Finish';
-        coordDisplay.textContent = `Algorithm: ${algoName}\nStep ${currentStep + 1}/${visualizationSteps.length}`;
+        
+        // Calculate total time covered by selected jobs
+        const timeSpan = parseInt(timeSpanInput.value);
+        const totalTimeCovered = selectedJobs.reduce((sum, job) => sum + job.duration, 0);
+        const percentageCovered = ((totalTimeCovered / timeSpan) * 100).toFixed(1);
+        
+        coordDisplay.textContent = `Algorithm: ${algoName}\nStep ${currentStep + 1}/${visualizationSteps.length}\nTime Coverage: ${percentageCovered}%`;
     }
 }
 
