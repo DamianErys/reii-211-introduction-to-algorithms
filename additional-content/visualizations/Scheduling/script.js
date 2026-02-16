@@ -68,18 +68,22 @@ function toggleStepMode() {
     }
 }
 
-// Generate random jobs with random positioning
+// Generate random jobs across random studios
 function generateJobs() {
-    const numJobs = parseInt(numJobsInput.value);
+    const numJobs = parseInt(numJobsInput.value); // Total number of films
     const timeSpan = parseInt(timeSpanInput.value);
+    
+    // Determine number of studios (rows) - random between 3 and 8
+    const numStudios = Math.floor(Math.random() * 6) + 3;
     
     jobs = [];
     
-    // Create jobs with completely random start times and durations
+    // Distribute jobs randomly across studios
     for (let i = 0; i < numJobs; i++) {
+        const studio = Math.floor(Math.random() * numStudios);
         const start = Math.floor(Math.random() * (timeSpan - 1));
-        const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 2)); // Max half the timespan
-        const duration = Math.floor(Math.random() * (maxDuration - 1)) + 1;
+        const maxDuration = Math.min(timeSpan - start, Math.floor(timeSpan / 3)); // Max 1/3 of timespan
+        const duration = Math.floor(Math.random() * Math.max(1, maxDuration - 1)) + 1;
         const end = start + duration;
         
         jobs.push({
@@ -87,15 +91,15 @@ function generateJobs() {
             start: start,
             end: end,
             duration: duration,
-            row: -1 // Will be assigned later
+            studio: studio
         });
     }
     
-    // Shuffle jobs to randomize order
-    jobs.sort(() => Math.random() - 0.5);
-    
-    // Assign rows based on which jobs can fit together
-    assignRowsToJobs();
+    // Sort by studio first, then by start time within each studio
+    jobs.sort((a, b) => {
+        if (a.studio !== b.studio) return a.studio - b.studio;
+        return a.start - b.start;
+    });
     
     selectedJobs = [];
     visualizationSteps = [];
@@ -107,45 +111,6 @@ function generateJobs() {
     
     updateDisplay();
     drawJobs();
-}
-
-// Assign rows to jobs so multiple jobs can be on the same row if they don't overlap
-function assignRowsToJobs() {
-    // Sort jobs by start time first
-    jobs.sort((a, b) => a.start - b.start);
-    
-    const rows = [];
-    
-    jobs.forEach(job => {
-        // Try to find a row where this job fits
-        let placed = false;
-        for (let i = 0; i < rows.length; i++) {
-            const row = rows[i];
-            // Check if this job can fit in this row (doesn't overlap with any job in the row)
-            const canFit = row.every(existingJob => 
-                job.start >= existingJob.end || job.end <= existingJob.start
-            );
-            
-            if (canFit) {
-                row.push(job);
-                job.row = i;
-                placed = true;
-                break;
-            }
-        }
-        
-        // If no row fits, create a new row
-        if (!placed) {
-            rows.push([job]);
-            job.row = rows.length - 1;
-        }
-    });
-    
-    // Re-shuffle the job IDs to make them truly random
-    const shuffledIds = jobs.map((_, i) => i + 1).sort(() => Math.random() - 0.5);
-    jobs.forEach((job, i) => {
-        job.id = shuffledIds[i];
-    });
 }
 
 // Draw empty canvas with axes
@@ -193,13 +158,37 @@ function drawJobs() {
     const timeSpan = parseInt(timeSpanInput.value);
     const barHeight = 20;
     const spacing = 5;
-    const totalBarsHeight = jobs.length * (barHeight + spacing);
+    
+    // Get the maximum studio number to determine total height needed
+    const maxStudio = Math.max(...jobs.map(j => j.studio));
+    const numStudios = maxStudio + 1;
+    const totalBarsHeight = numStudios * (barHeight + spacing);
     const startY = (CANVAS_HEIGHT - totalBarsHeight) / 2;
     
-    jobs.forEach((job, index) => {
-        const y = startY + index * (barHeight + spacing);
+    // Draw studio labels
+    ctx.fillStyle = '#666';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    for (let i = 0; i < numStudios; i++) {
+        const y = startY + i * (barHeight + spacing) + barHeight / 2;
+        ctx.fillText(`Studio ${i + 1}`, PADDING - 10, y + 4);
+    }
+    
+    jobs.forEach(job => {
+        const y = startY + job.studio * (barHeight + spacing);
         drawJob(job, y, barHeight, timeSpan, 'gray');
     });
+    
+    // Draw time labels
+    ctx.fillStyle = '#666';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    const numLabels = Math.min(timeSpan, 12);
+    for (let i = 0; i <= numLabels; i++) {
+        const month = Math.floor((i / numLabels) * timeSpan);
+        const x = PADDING + (month / timeSpan) * DRAW_WIDTH;
+        ctx.fillText(month, x, CANVAS_HEIGHT - PADDING + 20);
+    }
 }
 
 // Draw a single job bar
@@ -361,11 +350,24 @@ function drawVisualizationStep() {
     const timeSpan = parseInt(timeSpanInput.value);
     const barHeight = 20;
     const spacing = 5;
-    const totalBarsHeight = jobs.length * (barHeight + spacing);
+    
+    // Get the maximum studio number to determine total height needed
+    const maxStudio = Math.max(...jobs.map(j => j.studio));
+    const numStudios = maxStudio + 1;
+    const totalBarsHeight = numStudios * (barHeight + spacing);
     const startY = (CANVAS_HEIGHT - totalBarsHeight) / 2;
     
-    jobs.forEach((job, index) => {
-        const y = startY + index * (barHeight + spacing);
+    // Draw studio labels
+    ctx.fillStyle = '#666';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    for (let i = 0; i < numStudios; i++) {
+        const y = startY + i * (barHeight + spacing) + barHeight / 2;
+        ctx.fillText(`Studio ${i + 1}`, PADDING - 10, y + 4);
+    }
+    
+    jobs.forEach(job => {
+        const y = startY + job.studio * (barHeight + spacing);
         let color = 'gray';
         
         if (step.selected.includes(job)) {
@@ -378,6 +380,17 @@ function drawVisualizationStep() {
         
         drawJob(job, y, barHeight, timeSpan, color);
     });
+    
+    // Draw time labels
+    ctx.fillStyle = '#666';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    const numLabels = Math.min(timeSpan, 12);
+    for (let i = 0; i <= numLabels; i++) {
+        const month = Math.floor((i / numLabels) * timeSpan);
+        const x = PADDING + (month / timeSpan) * DRAW_WIDTH;
+        ctx.fillText(month, x, CANVAS_HEIGHT - PADDING + 20);
+    }
     
     updateDisplay();
 }
