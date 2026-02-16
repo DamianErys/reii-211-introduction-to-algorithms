@@ -27,6 +27,7 @@
 * [Overview](additional-content/README.md)
 * [Algorithm Visualizations](additional-content/visualizations/README.md)
   * [Heuristics Playground](additional-content/visualizations/Heuristics/README.md)
+  * [Scheduling Playground](additional-content/visualizations/Scheduling/README.md)
 
 
 ## Learning Materials
