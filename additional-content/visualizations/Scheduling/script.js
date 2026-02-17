@@ -310,28 +310,46 @@ function runShortestJob() {
     visualizationSteps = [];
     selectedJobs = [];
     
-    const sortedJobs = [...jobs].sort((a, b) => a.duration - b.duration);
-    let lastEnd = -1;
+    // Sort by duration ascending - shortest first
+    let remaining = [...jobs].sort((a, b) => a.duration - b.duration);
+    const rejected = [];
     
     visualizationSteps.push({ selected: [], considering: null, rejected: [] });
     
-    sortedJobs.forEach(job => {
-        if (job.start >= lastEnd) {
-            selectedJobs.push(job);
-            lastEnd = job.end;
-            visualizationSteps.push({ 
-                selected: [...selectedJobs], 
-                considering: job, 
-                rejected: sortedJobs.filter(j => !selectedJobs.includes(j) && sortedJobs.indexOf(j) <= sortedJobs.indexOf(job))
-            });
-        } else {
-            visualizationSteps.push({ 
-                selected: [...selectedJobs], 
-                considering: job, 
-                rejected: sortedJobs.filter(j => !selectedJobs.includes(j) && sortedJobs.indexOf(j) <= sortedJobs.indexOf(job))
-            });
-        }
-    });
+    while (remaining.length > 0) {
+        // Pick the shortest job from what's left
+        const job = remaining[0];
+        
+        // Accept it
+        selectedJobs.push(job);
+        
+        // Remove it from remaining
+        remaining.shift();
+        
+        // Remove all jobs that intersect with the accepted job
+        const newRemaining = [];
+        remaining.forEach(j => {
+            if (j.start < job.end && j.end > job.start) {
+                // Intersects - remove it
+                rejected.push(j);
+                visualizationSteps.push({
+                    selected: [...selectedJobs],
+                    considering: j,
+                    rejected: [...rejected]
+                });
+            } else {
+                newRemaining.push(j);
+            }
+        });
+        remaining = newRemaining;
+        
+        // Record step after accepting the job
+        visualizationSteps.push({
+            selected: [...selectedJobs],
+            considering: job,
+            rejected: [...rejected]
+        });
+    }
     
     updateDisplay();
 }
