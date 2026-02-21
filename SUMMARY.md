@@ -24,6 +24,7 @@
   * [Working with the Big Oh](study-units/unit-2/sections/4-working-with-the-big-oh.md)
   * [Reasoning about Efficiency](study-units/unit-2/sections/5-reasoning-about-efficiency.md)
   * [Summations](study-units/unit-2/sections/6-summations.md)
+  * [Logarithms and Their Applications](study-units/unit-2/sections/7-logs.md)
   <!-- * [Logarithms and Their Applications](study-units/unit-2/sections/7-logarithms-and-their-applications.md)
   * [Properties of Logarithms](study-units/unit-2/sections/8-properties-of-logarithms.md) -->
 * [Unit 3](study-units/unit-3/README.md)
