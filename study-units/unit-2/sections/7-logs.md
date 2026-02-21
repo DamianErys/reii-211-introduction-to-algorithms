@@ -24,7 +24,7 @@ Turning this around: a binary tree with *n* leaves has height at least *log₂ n
 
 Generalising to trees where each node has *d* children: the number of leaves multiplies by *d* at each level, so a tree of height *h* has at most *dʰ* leaves. To store *n* leaves requires height *h = log_d n*.
 
-<!-- ![A height-3 tree with d=3 children per node, and binary bit patterns of length 3](Fig2_7.png) -->
+![A height-3 tree with d=3 children per node, and binary bit patterns of length 3](Fig2_7.png)
 {% hint style="success" %}
 **Skiena Figure 2.7:** A tree of height *h* with *d* children per node has *dʰ* leaves (left). Bit patterns of length *h* correspond to root-to-leaf paths in a binary tree of height *h* (right).
 {% endhint %}
