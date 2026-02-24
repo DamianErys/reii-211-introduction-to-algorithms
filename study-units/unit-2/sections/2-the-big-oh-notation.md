@@ -79,16 +79,39 @@ The best way to get comfortable with Big Oh is to work through concrete examples
 A common trap: seeing *n² = O(n³)* and feeling like something is wrong. It is not. O gives an **upper bound**, not an exact description. *n²* is one of the many functions that are *O(n³)*. Read the "=" in Big Oh as "is one of the functions that are", not as strict equality.
 {% endhint %}
 
+
+<!-- 
 ## Applying the Definitions: Two Worked Examples
 
-**Is 2^(n+1) = Θ(2^n)?**
+### Is $2^{n+1} = \Theta(2^n)$?
 
-Go back to the definitions. For the O direction: *2^(n+1) = 2 · 2^n*, so *2^(n+1) ≤ c · 2^n* holds for any *c ≥ 2*. For the Ω direction: *2^(n+1) ≥ c · 2^n* holds for any *0 < c ≤ 2*. Both bounds hold, so yes — *2^(n+1) = Θ(2^n)*.
+Go back to the definitions.
 
-**Is (x + y)² = O(x² + y²)?**
+* **For the $O$ direction:** 
+$$2^{n+1} = 2 \cdot 2^n$$
 
-Expand the left side: *(x + y)² = x² + 2xy + y²*. The *2xy* term is the complication. If *x ≤ y*, then *2xy ≤ 2y² ≤ 2(x² + y²)*. If *x ≥ y*, then *2xy ≤ 2x² ≤ 2(x² + y²)*. Either way, *2xy ≤ 2(x² + y²)*, so *(x + y)² ≤ 3(x² + y²)*, and the bound holds with *c = 3*.
+so $2^{n+1} \le c \cdot 2^n$ holds for any $c \ge 2$.
+
+* **For the $\Omega$ direction:** $2^{n+1} \ge c \cdot 2^n$ holds for any $0 < c \le 2$.
+
+Both bounds hold, so **yes** — $2^{n+1} = \Theta(2^n)$.
+
+---
+
+### Is $(x + y)^2 = O(x^2 + y^2)$?
+
+Expand the left side: 
+
+$$(x + y)^2 = x^2 + 2xy + y^2$$
+
+The $2xy$ term is the complication.
+
+* If $x \le y$, then $2xy \le 2y^2 \le 2(x^2 + y^2)$.
+* If $x \ge y$, then $2xy \le 2x^2 \le 2(x^2 + y^2)$.
+
+Either way, $2xy \le 2(x^2 + y^2)$, so $(x + y)^2 \le 3(x^2 + y^2)$, and the bound holds with $c = 3$.
 
 {% hint style="info" %}
-**The golden rule for Big Oh problems:** resist the urge to be clever. Go back to the definition, work with the inequality, and find a constant *c* that makes it hold. That is all that is ever required.
-{% endhint %}
+**The golden rule for Big Oh problems:** resist the urge to be clever. Go back to the definition, work with the inequality, and find a constant $c$ that makes it hold. That is all that is ever required.
+{% endhint %} -->
+
