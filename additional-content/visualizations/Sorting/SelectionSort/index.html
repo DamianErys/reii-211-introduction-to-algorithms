@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Selection Sort</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div id="controls">
+    <div class="control-group">
+      <label>Entries: <span id="entries-val">50</span></label>
+      <input type="range" id="entries" min="1" max="1000" value="50" />
+    </div>
+
+    <div class="control-group">
+      <label>Speed: <span id="speed-val">1x</span></label>
+      <input type="range" id="speed" min="1" max="100" value="1" />
+    </div>
+
+    <div class="control-group checkbox-group">
+      <label><input type="checkbox" id="realtime" /> Realtime (no delay)</label>
+    </div>
+
+    <div class="control-group checkbox-group">
+      <label><input type="checkbox" id="stepwise" disabled /> Stepwise</label>
+    </div>
+
+    <div class="control-group buttons">
+      <button id="btn-reset">Reset</button>
+      <button id="btn-shuffle">Shuffle</button>
+      <button id="btn-solve">Solve</button>
+    </div>
+  </div>
+
+  <div id="visualizer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
