@@ -1,33 +1,25 @@
-// ── State ──────────────────────────────────────────────────────────────────
-const canvas   = document.getElementById('canvas');
-const ctx      = canvas.getContext('2d');
+// ── Canvas & DOM refs ──────────────────────────────────────────────────────
+const canvas      = document.getElementById('canvas');
+const ctx         = canvas.getContext('2d');
 
 const sliderN     = document.getElementById('slider-n');
 const sliderSpeed = document.getElementById('slider-speed');
 const valN        = document.getElementById('val-n');
 const valSpeed    = document.getElementById('val-speed');
 const chkRealtime = document.getElementById('chk-realtime');
+const chkStepwise = document.getElementById('chk-stepwise');
 
-const btnReset   = document.getElementById('btn-reset');
-const btnShuffle = document.getElementById('btn-shuffle');
-const btnSolve   = document.getElementById('btn-solve');
+const btnReset    = document.getElementById('btn-reset');
+const btnShuffle  = document.getElementById('btn-shuffle');
+const btnSolve    = document.getElementById('btn-solve');
+const btnPrev     = document.getElementById('btn-prev');
+const btnNext     = document.getElementById('btn-next');
 
-const statCmp    = document.getElementById('stat-cmp');
-const statSwaps  = document.getElementById('stat-swaps');
-const statStatus = document.getElementById('stat-status');
+const statCmp     = document.getElementById('stat-cmp');
+const statSwaps   = document.getElementById('stat-swaps');
+const statStatus  = document.getElementById('stat-status');
 
-let array       = [];
-let n           = parseInt(sliderN.value);
-let sortedUpTo  = -1;      // indices 0..sortedUpTo are in final position
-let iPointer    = -1;      // outer loop pointer
-let jPointer    = -1;      // inner loop pointer (scanning)
-let minPointer  = -1;      // current minimum index
-let running     = false;
-let animFrame   = null;
-let comparisons = 0;
-let swaps       = 0;
-
-// ── Colour palette ─────────────────────────────────────────────────────────
+// ── Colours ────────────────────────────────────────────────────────────────
 const COLOR = {
   default:   '#8b5cf6',
   sorted:    '#22c55e',
@@ -36,14 +28,26 @@ const COLOR = {
   outer:     '#f59e0b',
 };
 
+// ── Runtime state ──────────────────────────────────────────────────────────
+let array       = [];
+let n           = parseInt(sliderN.value);
+
+let sortedUpTo  = -1;
+let iPointer    = -1;
+let jPointer    = -1;
+let minPointer  = -1;
+let running     = false;
+let comparisons = 0;
+let swaps       = 0;
+
+// stepwise
+let stepHistory = [];
+let stepCursor  = -1;
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 function buildArray(mode = 'reset') {
-  if (mode === 'reset') {
-    // sequential 1..n
-    array = Array.from({ length: n }, (_, i) => i + 1);
-  } else {
-    // shuffle existing or fresh
-    array = Array.from({ length: n }, (_, i) => i + 1);
+  array = Array.from({ length: n }, (_, i) => i + 1);
+  if (mode === 'shuffle') {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
@@ -54,16 +58,18 @@ function buildArray(mode = 'reset') {
 }
 
 function resetState() {
-  sortedUpTo  = -1;
-  iPointer    = -1;
-  jPointer    = -1;
-  minPointer  = -1;
-  comparisons = 0;
-  swaps       = 0;
-  running     = false;
-  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+  sortedUpTo   = -1;
+  iPointer     = -1;
+  jPointer     = -1;
+  minPointer   = -1;
+  comparisons  = 0;
+  swaps        = 0;
+  running      = false;
+  stepHistory  = [];
+  stepCursor   = -1;
   updateStats('Ready');
   setButtons(false);
+  syncStepwiseUI();
 }
 
 function updateStats(status) {
@@ -77,6 +83,80 @@ function setButtons(sorting) {
   btnReset.disabled   = sorting;
   btnShuffle.disabled = sorting;
   sliderN.disabled    = sorting;
+}
+
+function syncStepwiseUI() {
+  const sw = chkStepwise.checked;
+  btnSolve.style.display = sw ? 'none' : '';
+  btnPrev.style.display  = sw ? ''     : 'none';
+  btnNext.style.display  = sw ? ''     : 'none';
+  if (sw) updateStepButtons();
+}
+
+function updateStepButtons() {
+  const built = stepHistory.length > 0;
+  btnPrev.disabled    = !built || stepCursor <= 0;
+  btnNext.disabled    = built && stepCursor >= stepHistory.length - 1;
+  btnReset.disabled   = false;
+  btnShuffle.disabled = false;
+  sliderN.disabled    = false;
+}
+
+// ── Step history ───────────────────────────────────────────────────────────
+function buildStepHistory() {
+  const s   = [...array];   // local working copy
+  const len = s.length;
+  stepHistory = [];
+
+  let st = -1, ip = -1, jp = -1, mp = -1, cmp = 0, sw = 0;
+
+  const snap = (status) => stepHistory.push({
+    array: [...s], sortedUpTo: st,
+    iPointer: ip, jPointer: jp, minPointer: mp,
+    comparisons: cmp, swaps: sw, status,
+  });
+
+  snap('Ready — press Next Step to begin');
+
+  for (let i = 0; i < len; i++) {
+    ip = i; mp = i; jp = -1;
+    snap(`Outer i=${i}: scanning for minimum starting at value ${s[i]}`);
+
+    for (let j = i + 1; j < len; j++) {
+      jp = j;
+      cmp++;
+      snap(`Comparing s[${j}]=${s[j]} vs current min s[${mp}]=${s[mp]}`);
+
+      if (s[j] < s[mp]) {
+        mp = j;
+        snap(`New minimum! s[${mp}]=${s[mp]} at index ${mp}`);
+      }
+    }
+
+    if (mp !== i) {
+      snap(`Swapping s[${i}]=${s[i]} ↔ s[${mp}]=${s[mp]}`);
+      [s[i], s[mp]] = [s[mp], s[i]];
+      sw++;
+    }
+
+    st = i; ip = -1; jp = -1; mp = -1;
+    snap(`Index ${i} sorted ✓ (value ${s[i]})`);
+  }
+
+  st = len - 1;
+  snap('Done ✓ — array fully sorted!');
+}
+
+function applySnapshot(snap) {
+  array       = [...snap.array];
+  sortedUpTo  = snap.sortedUpTo;
+  iPointer    = snap.iPointer;
+  jPointer    = snap.jPointer;
+  minPointer  = snap.minPointer;
+  comparisons = snap.comparisons;
+  swaps       = snap.swaps;
+  updateStats(snap.status);
+  draw();
 }
 
 // ── Drawing ────────────────────────────────────────────────────────────────
@@ -98,23 +178,20 @@ function draw() {
   const W = canvas.width;
   const H = canvas.height;
   ctx.clearRect(0, 0, W, H);
-
   if (!array.length) return;
 
-  const maxVal  = n;                          // max possible value
-  const gap     = Math.max(1, Math.floor(W / array.length / 8));
-  const barW    = (W - gap * (array.length + 1)) / array.length;
-  const usableH = H - 4;
+  const gap  = Math.max(1, Math.floor(W / array.length / 8));
+  const barW = (W - gap * (array.length + 1)) / array.length;
+  const usH  = H - 4;
 
   for (let i = 0; i < array.length; i++) {
-    const barH = Math.max(2, (array[i] / maxVal) * usableH);
+    const barH = Math.max(2, (array[i] / n) * usH);
     const x    = gap + i * (barW + gap);
     const y    = H - barH;
 
     ctx.fillStyle = barColor(i);
     ctx.beginPath();
     if (barW >= 4) {
-      // rounded top corners
       const r = Math.min(2, barW / 2);
       ctx.moveTo(x + r, y);
       ctx.lineTo(x + barW - r, y);
@@ -130,23 +207,20 @@ function draw() {
   }
 }
 
-// ── Speed mapping ─────────────────────────────────────────────────────────
-// slider 1 → ~600 ms delay, slider 100 → ~2 ms delay (log scale)
+// ── Speed → delay ──────────────────────────────────────────────────────────
 function getDelay() {
   if (chkRealtime.checked) return 0;
-  const s = parseInt(sliderSpeed.value);   // 1–100
-  // map: 1→600ms, 100→2ms  (exponential)
+  const s = parseInt(sliderSpeed.value);
   return Math.round(600 * Math.pow(2 / 600, (s - 1) / 99));
 }
 
-// ── Selection Sort (async generator) ──────────────────────────────────────
+// ── Animated sort ──────────────────────────────────────────────────────────
 async function* selectionSortGen() {
-  const s = array;
+  const s   = array;
   const len = s.length;
 
   for (let i = 0; i < len; i++) {
-    iPointer   = i;
-    minPointer = i;
+    iPointer = i; minPointer = i;
 
     for (let j = i + 1; j < len; j++) {
       jPointer = j;
@@ -162,7 +236,6 @@ async function* selectionSortGen() {
       }
     }
 
-    // swap
     if (minPointer !== i) {
       [s[i], s[minPointer]] = [s[minPointer], s[i]];
       swaps++;
@@ -174,11 +247,9 @@ async function* selectionSortGen() {
     yield;
   }
 
-  iPointer   = -1;
-  sortedUpTo = len - 1;
+  iPointer = -1; sortedUpTo = len - 1;
 }
 
-// ── Run loop ───────────────────────────────────────────────────────────────
 async function runSort() {
   running = true;
   setButtons(true);
@@ -187,30 +258,28 @@ async function runSort() {
   const gen = selectionSortGen();
 
   if (chkRealtime.checked) {
-    // burn through all steps instantly, just do one final draw
-    for (const _ of (function* () { yield* gen; })()) { /* no-op */ }
-    draw();
+    // exhaust all steps synchronously
+    let result = gen.next();
+    while (!result.done) result = gen.next();
     finishSort();
     return;
   }
 
   const delay = () => new Promise(res => setTimeout(res, getDelay()));
-
-  for await (const _ of gen) {
+  let result = gen.next();
+  while (!result.done) {
     if (!running) break;
     draw();
     await delay();
+    result = gen.next();
   }
-
   if (running) finishSort();
 }
 
 function finishSort() {
-  sortedUpTo  = array.length - 1;
-  iPointer    = -1;
-  jPointer    = -1;
-  minPointer  = -1;
-  running     = false;
+  sortedUpTo = array.length - 1;
+  iPointer = -1; jPointer = -1; minPointer = -1;
+  running  = false;
   draw();
   updateStats('Done ✓');
   setButtons(false);
@@ -231,6 +300,11 @@ chkRealtime.addEventListener('change', () => {
   sliderSpeed.disabled = chkRealtime.checked;
 });
 
+chkStepwise.addEventListener('change', () => {
+  buildArray('reset');   // clear everything, rebuild fresh
+  syncStepwiseUI();
+});
+
 btnReset.addEventListener('click', () => {
   n = parseInt(sliderN.value);
   buildArray('reset');
@@ -242,9 +316,26 @@ btnShuffle.addEventListener('click', () => {
 });
 
 btnSolve.addEventListener('click', () => {
-  if (!array.length) return;
-  // if already sorted or fresh, go
+  if (!array.length || chkStepwise.checked) return;
   runSort();
+});
+
+btnNext.addEventListener('click', () => {
+  if (stepHistory.length === 0) {
+    buildStepHistory();
+    stepCursor = 0;
+  } else {
+    stepCursor = Math.min(stepCursor + 1, stepHistory.length - 1);
+  }
+  applySnapshot(stepHistory[stepCursor]);
+  updateStepButtons();
+});
+
+btnPrev.addEventListener('click', () => {
+  if (stepHistory.length === 0 || stepCursor <= 0) return;
+  stepCursor = Math.max(stepCursor - 1, 0);
+  applySnapshot(stepHistory[stepCursor]);
+  updateStepButtons();
 });
 
 window.addEventListener('resize', () => {
@@ -255,3 +346,4 @@ window.addEventListener('resize', () => {
 // ── Init ───────────────────────────────────────────────────────────────────
 resizeCanvas();
 buildArray('reset');
+syncStepwiseUI();
