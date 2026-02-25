@@ -17,7 +17,7 @@ h2 {
     color: white;
     margin-bottom: 20px;
     font-size: 28px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .container {
@@ -31,10 +31,10 @@ h2 {
 
 .controls {
     flex: 0 0 280px;
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .canvas-container {
@@ -51,10 +51,10 @@ h2 {
 }
 
 .info-box {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .control-group {
@@ -118,14 +118,14 @@ button {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     width: 100%;
 }
 
 button:hover:not(:disabled) {
     background: #7c3aed;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 button:active:not(:disabled) {
@@ -148,7 +148,7 @@ button:disabled {
 
 .algo-btn.selected {
     background: #1e40af;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #cpBtn {
@@ -195,7 +195,7 @@ button:disabled {
     color: #6b21a8;
     font-weight: bold;
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-size: 13px;
 }
 
@@ -215,17 +215,17 @@ canvas {
     background: white;
     border: 3px solid #a78bfa;
     border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
     display: block;
     cursor: crosshair;
 }
 
 .canvas-info {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     padding: 12px;
     border-radius: 8px;
     margin-top: 15px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .canvas-info p {
@@ -283,4 +283,102 @@ canvas {
 
 .info-box p {
     margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 60px 24px 80px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 56px;
+}
+
+header h1 {
+    font-size: clamp(24px, 5vw, 42px);
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+}
+
+header p {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 14px;
+}
+
+.section-label {
+    width: 100%;
+    max-width: 860px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    margin: 28px 0 12px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 860px;
+}
+
+.card {
+    display: block;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 24px 24px 20px;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::after {
+    content: '→';
+    position: absolute;
+    bottom: 18px;
+    right: 20px;
+    font-size: 18px;
+    color: #8b5cf6;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.3);
+}
+
+.card:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #6b21a8;
+    margin-bottom: 4px;
+}
+
+.card-sub {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+footer {
+    margin-top: 72px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
 }
