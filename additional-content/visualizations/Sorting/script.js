@@ -6,7 +6,6 @@ const sliderN     = document.getElementById('slider-n');
 const sliderSpeed = document.getElementById('slider-speed');
 const valN        = document.getElementById('val-n');
 const valSpeed    = document.getElementById('val-speed');
-const chkRealtime = document.getElementById('chk-realtime');
 const chkStepwise = document.getElementById('chk-stepwise');
 
 const btnReset    = document.getElementById('btn-reset');
@@ -209,7 +208,6 @@ function draw() {
 
 // ── Speed → delay ──────────────────────────────────────────────────────────
 function getDelay() {
-  if (chkRealtime.checked) return 0;
   const s = parseInt(sliderSpeed.value);
   return Math.round(600 * Math.pow(2 / 600, (s - 1) / 99));
 }
@@ -257,14 +255,6 @@ async function runSort() {
 
   const gen = selectionSortGen();
 
-  if (chkRealtime.checked) {
-    // exhaust all steps synchronously
-    let result = gen.next();
-    while (!result.done) result = gen.next();
-    finishSort();
-    return;
-  }
-
   const delay = () => new Promise(res => setTimeout(res, getDelay()));
   let result = gen.next();
   while (!result.done) {
@@ -294,10 +284,6 @@ sliderN.addEventListener('input', () => {
 
 sliderSpeed.addEventListener('input', () => {
   valSpeed.textContent = sliderSpeed.value + '×';
-});
-
-chkRealtime.addEventListener('change', () => {
-  sliderSpeed.disabled = chkRealtime.checked;
 });
 
 chkStepwise.addEventListener('change', () => {
