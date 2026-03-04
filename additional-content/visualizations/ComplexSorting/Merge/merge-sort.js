@@ -17,24 +17,47 @@ const statMerges  = document.getElementById('stat-merges');
 const statDepth   = document.getElementById('stat-depth');
 const statStatus  = document.getElementById('stat-status');
 
-// ── colours ────────────────────────────────────────────────────────────────
+// ── colour palette ─────────────────────────────────────────────────────────
+// Deconstruction colours
+//   idle      pale purple   not yet reached
+//   active    amber         currently being split
+//   split     purple        has been divided
+//   leaf      sky blue      single element base case
+//   done      grey          internal node faded after split complete
+//
+// Merge colours
+//   merging   orange        parent node being assembled
+//   cmp_left  yellow-green  left pointer — element under comparison
+//   cmp_right pink          right pointer — element under comparison
+//   winner    green         element chosen / placed into merged result
+//   placed    teal          element already placed, waiting
+//   sorted    emerald       node fully merged and sorted
+
 const COLORS = {
-  active:  { fill: '#f59e0b', stroke: '#b45309', text: '#fff' },  // amber  — about to split
-  split:   { fill: '#8b5cf6', stroke: '#6d28d9', text: '#fff' },  // purple — has been split
-  leaf:    { fill: '#38bdf8', stroke: '#0284c7', text: '#fff' },  // blue   — single element
-  idle:    { fill: '#ddd6fe', stroke: '#a78bfa', text: '#5b21b6' },// pale  — waiting
-  done:    { fill: '#94a3b8', stroke: '#64748b', text: '#fff' },  // grey   — faded internal
+  idle:      { fill: '#ddd6fe', stroke: '#a78bfa', text: '#5b21b6' },
+  active:    { fill: '#f59e0b', stroke: '#b45309', text: '#fff'    },
+  split:     { fill: '#8b5cf6', stroke: '#6d28d9', text: '#fff'    },
+  leaf:      { fill: '#38bdf8', stroke: '#0284c7', text: '#fff'    },
+  done:      { fill: '#94a3b8', stroke: '#64748b', text: '#fff'    },
+  merging:   { fill: '#fb923c', stroke: '#c2410c', text: '#fff'    },
+  cmp_left:  { fill: '#facc15', stroke: '#a16207', text: '#1a1a1a' },
+  cmp_right: { fill: '#f472b6', stroke: '#be185d', text: '#fff'    },
+  winner:    { fill: '#4ade80', stroke: '#15803d', text: '#1a1a1a' },
+  placed:    { fill: '#2dd4bf', stroke: '#0f766e', text: '#fff'    },
+  sorted:    { fill: '#22c55e', stroke: '#15803d', text: '#fff'    },
 };
 
-// ── state ──────────────────────────────────────────────────────────────────
+// ── app state ──────────────────────────────────────────────────────────────
 let array     = [];
 let treeRoot  = null;
-let steps     = [];      // each step = { visibleIds: Set, nodeStates: Map, label }
+let steps     = [];
 let stepIndex = -1;
 let animTimer = null;
 let uiMode    = 'idle';
+let cmpCount  = 0;
+let mergeCount = 0;
 
-// ── array helpers ──────────────────────────────────────────────────────────
+// ── helpers ────────────────────────────────────────────────────────────────
 function freshArray(n) {
   const vals = [], used = new Set();
   while (vals.length < n) {
@@ -54,14 +77,14 @@ function shuffleArr(arr) {
 }
 
 function stepDelay() {
-  const s = parseInt(sliderSpeed.value); // 1–20
+  const s = parseInt(sliderSpeed.value);
   return Math.round(1800 * Math.pow(60 / 1800, (s - 1) / 19));
 }
 
 // ── tree ───────────────────────────────────────────────────────────────────
 let _uid = 0;
 function buildTree(vals, depth = 0) {
-  const node = { id: _uid++, values: vals, depth, left: null, right: null };
+  const node = { id: _uid++, values: [...vals], origValues: [...vals], depth, left: null, right: null };
   if (vals.length > 1) {
     const mid  = Math.floor(vals.length / 2);
     node.left  = buildTree(vals.slice(0, mid), depth + 1);
@@ -83,44 +106,47 @@ function treeDepth(node) {
   return 1 + Math.max(treeDepth(node.left), treeDepth(node.right));
 }
 
-// ── step generator ─────────────────────────────────────────────────────────
-// Each step carries:
-//   visibleIds  — Set of node ids that should be drawn
-//   nodeStates  — Map<id, colorKey> for every visible node
-//   label       — status bar string
+// ── step system ────────────────────────────────────────────────────────────
+// Each step:
+//   visibleIds  Set<id>         which nodes are drawn
+//   nodeStates  Map<id,key>     overall node colour
+//   blockColors Map<id, key[]>  per-block colour override for that node
+//                               (null = use nodeStates colour for all)
+//   nodeValues  Map<id, val[]>  current values shown in each node's blocks
+//   label       string
 
 function generateSteps(root) {
-  const list = [];
+  const list   = [];
+  const allNodes = collectNodes(root);
 
-  // Deep-clone helpers
-  function snapStates(statesMap) { return new Map(statesMap); }
+  const visible     = new Set();
+  const nStates     = new Map();   // id → colorKey
+  const bColors     = new Map();   // id → val[] of colorKeys  (or null)
+  const nValues     = new Map();   // id → current display values
 
-  // Working copies
-  const visible = new Set();   // ids rendered so far
-  const states  = new Map();   // id → colorKey
+  // Initialise all nodes with their original values
+  allNodes.forEach((nd, id) => nValues.set(id, [...nd.origValues]));
 
-  function snap(label) {
+  function snap(label, extraStats = {}) {
     list.push({
-      visibleIds: new Set(visible),
-      nodeStates: snapStates(states),
+      visibleIds:  new Set(visible),
+      nodeStates:  new Map(nStates),
+      blockColors: new Map(bColors),
+      nodeValues:  new Map(Array.from(nValues.entries()).map(([k,v]) => [k,[...v]])),
       label,
+      ...extraStats,
     });
   }
 
-  // Step 0: just the root, coloured as idle before we start
-  visible.add(root.id);
-  states.set(root.id, 'idle');
-  snap('Array ready — press Solve to begin splitting');
-
-  function dfs(node) {
+  // ── PHASE 1: deconstruction DFS ──────────────────────────────────────────
+  function splitDfs(node) {
     if (node.values.length <= 1) {
-      // Highlight as active (arriving at leaf)
-      states.set(node.id, 'active');
-      snap(`[${node.values[0]}] — single element, no split needed`);
+      nStates.set(node.id, 'active');
+      bColors.set(node.id, null);
+      snap(`[${node.values[0]}] — single element, base case reached`);
 
-      // Settle as leaf
-      states.set(node.id, 'leaf');
-      snap(`[${node.values[0]}] is a base case ✓`);
+      nStates.set(node.id, 'leaf');
+      snap(`[${node.values[0]}] ✓`);
       return;
     }
 
@@ -128,49 +154,157 @@ function generateSteps(root) {
     const left  = node.values.slice(0, mid);
     const right = node.values.slice(mid);
 
-    // 1. Highlight this node — we're about to split it
-    states.set(node.id, 'active');
-    snap(`Splitting [${node.values.join(', ')}] into two halves`);
+    nStates.set(node.id, 'active');
+    bColors.set(node.id, null);
+    snap(`Splitting [${node.values.join(', ')}] → left: [${left.join(', ')}]  right: [${right.join(', ')}]`);
 
-    // 2. Mark as split and reveal both children as idle
-    states.set(node.id, 'split');
+    nStates.set(node.id, 'split');
     visible.add(node.left.id);
     visible.add(node.right.id);
-    states.set(node.left.id,  'idle');
-    states.set(node.right.id, 'idle');
+    nStates.set(node.left.id,  'idle');
+    nStates.set(node.right.id, 'idle');
+    bColors.set(node.left.id,  null);
+    bColors.set(node.right.id, null);
     snap(`[${left.join(', ')}]  |  [${right.join(', ')}]`);
 
-    // 3. Recurse left
-    dfs(node.left);
+    splitDfs(node.left);
+    splitDfs(node.right);
 
-    // 4. Recurse right
-    dfs(node.right);
-
-    // 5. Once both children are done, fade this internal node to 'done'
-    states.set(node.id, 'done');
-    snap(`Both halves of [${node.values.join(', ')}] fully split`);
+    nStates.set(node.id, 'done');
+    bColors.set(node.id, null);
+    snap(`[${node.values.join(', ')}] fully split — ready to merge back`);
   }
 
-  dfs(root);
+  // Step 0: root alone, idle
+  visible.add(root.id);
+  nStates.set(root.id, 'idle');
+  bColors.set(root.id, null);
+  snap('Array ready — click Solve to begin');
 
-  // Final step: everything settled
-  snap('Array fully deconstructed — ready to merge ↑');
+  splitDfs(root);
+  snap('Deconstruction complete — beginning merge phase ↑');
+
+  // ── PHASE 2: merge DFS ───────────────────────────────────────────────────
+  // Returns sorted array for this node. Generates detailed steps.
+  function mergeDfs(node) {
+    if (!node.left && !node.right) {
+      // leaf — already sorted
+      nStates.set(node.id, 'sorted');
+      bColors.set(node.id, null);
+      return [...node.values];
+    }
+
+    // Recurse children first
+    const leftSorted  = mergeDfs(node.left);
+    const rightSorted = mergeDfs(node.right);
+
+    mergeCount++;
+
+    // Announce this merge
+    nStates.set(node.id, 'merging');
+    // Show children with 'placed' colouring to indicate they're the source
+    bColors.set(node.left.id,  leftSorted.map(() => 'placed'));
+    bColors.set(node.right.id, rightSorted.map(() => 'placed'));
+    nValues.set(node.left.id,  [...leftSorted]);
+    nValues.set(node.right.id, [...rightSorted]);
+    // Parent is empty while being built — show no blocks yet via empty array
+    nValues.set(node.id, []);
+    bColors.set(node.id, []);
+    snap(`Merging [${leftSorted.join(', ')}] + [${rightSorted.join(', ')}]`,
+         { merges: mergeCount });
+
+    // Step through the merge
+    const merged = [];
+    let i = 0, j = 0;
+
+    while (i < leftSorted.length && j < rightSorted.length) {
+      cmpCount++;
+      const lVal = leftSorted[i];
+      const rVal = rightSorted[j];
+
+      // Highlight the two pointers
+      const lColors = leftSorted.map((_, k) => k === i ? 'cmp_left'  : (k < i ? 'winner' : 'placed'));
+      const rColors = rightSorted.map((_, k) => k === j ? 'cmp_right' : (k < j ? 'winner' : 'placed'));
+      bColors.set(node.left.id,  lColors);
+      bColors.set(node.right.id, rColors);
+      nValues.set(node.id, [...merged]);
+      bColors.set(node.id, merged.map(() => 'winner'));
+      snap(`Comparing ${lVal} (left) vs ${rVal} (right) — which is smaller?`,
+           { cmp: cmpCount });
+
+      // Show the winner
+      if (lVal <= rVal) {
+        merged.push(lVal);
+        const lColorsAfter = leftSorted.map((_, k) => k === i ? 'winner' : (k < i ? 'winner' : 'placed'));
+        bColors.set(node.left.id, lColorsAfter);
+        nValues.set(node.id, [...merged]);
+        bColors.set(node.id, merged.map(() => 'winner'));
+        snap(`${lVal} ≤ ${rVal} — take ${lVal} from left`, { cmp: cmpCount });
+        i++;
+      } else {
+        merged.push(rVal);
+        const rColorsAfter = rightSorted.map((_, k) => k === j ? 'winner' : (k < j ? 'winner' : 'placed'));
+        bColors.set(node.right.id, rColorsAfter);
+        nValues.set(node.id, [...merged]);
+        bColors.set(node.id, merged.map(() => 'winner'));
+        snap(`${rVal} < ${lVal} — take ${rVal} from right`, { cmp: cmpCount });
+        j++;
+      }
+    }
+
+    // Drain remaining left
+    while (i < leftSorted.length) {
+      merged.push(leftSorted[i]);
+      const lColors = leftSorted.map((_, k) => k < i ? 'winner' : (k === i ? 'cmp_left' : 'placed'));
+      bColors.set(node.left.id, lColors);
+      nValues.set(node.id, [...merged]);
+      bColors.set(node.id, merged.map(() => 'winner'));
+      snap(`Right exhausted — append remaining left: ${leftSorted[i]}`, { cmp: cmpCount });
+      i++;
+    }
+
+    // Drain remaining right
+    while (j < rightSorted.length) {
+      merged.push(rightSorted[j]);
+      const rColors = rightSorted.map((_, k) => k < j ? 'winner' : (k === j ? 'cmp_right' : 'placed'));
+      bColors.set(node.right.id, rColors);
+      nValues.set(node.id, [...merged]);
+      bColors.set(node.id, merged.map(() => 'winner'));
+      snap(`Left exhausted — append remaining right: ${rightSorted[j]}`, { cmp: cmpCount });
+      j++;
+    }
+
+    // Merged result settled — mark node sorted, fade children
+    nValues.set(node.id, [...merged]);
+    bColors.set(node.id, merged.map(() => 'sorted'));
+    nStates.set(node.id, 'sorted');
+    nStates.set(node.left.id,  'done');
+    nStates.set(node.right.id, 'done');
+    bColors.set(node.left.id,  merged.slice(0, leftSorted.length).map(() => 'done'));
+    bColors.set(node.right.id, merged.slice(0, rightSorted.length).map(() => 'done'));
+    snap(`Merged → [${merged.join(', ')}] ✓`, { cmp: cmpCount, merges: mergeCount });
+
+    // Update the node's display values for future reference
+    node.values = [...merged];
+
+    return merged;
+  }
+
+  mergeDfs(root);
+
+  snap('Array fully sorted! ✓', { cmp: cmpCount, merges: mergeCount });
 
   return list;
 }
 
 // ── layout ─────────────────────────────────────────────────────────────────
-// The layout always positions ALL nodes (even invisible ones) so positions
-// are stable. We just skip drawing nodes not in visibleIds.
-
 function layoutTree(root, W, H) {
   const depth   = treeDepth(root);
   const TOP_PAD = 24, BOT_PAD = 16;
-  const n       = root.values.length;
+  const n       = root.origValues.length;
   const BASE_W  = Math.max(22, Math.min(52, (W * 0.86) / (n * 1.28)));
   const levelH  = (H - TOP_PAD - BOT_PAD) / depth;
 
-  // BFS levels
   const levels = [];
   let cur = [root];
   while (cur.length) {
@@ -192,8 +326,9 @@ function layoutTree(root, W, H) {
     const bGap  = Math.max(3, bW * 0.20);
     const y     = TOP_PAD + li * levelH;
 
+    // Layout based on ORIGINAL values length so positions never shift
     const nodeWidths = levelNodes.map(nd =>
-      nd.values.length * bW + (nd.values.length - 1) * bGap
+      nd.origValues.length * bW + (nd.origValues.length - 1) * bGap
     );
     const totalNodeW = nodeWidths.reduce((s, w) => s + w, 0);
     const padding    = W * 0.06;
@@ -208,20 +343,13 @@ function layoutTree(root, W, H) {
       nd._bW     = bW;
       nd._bH     = bH;
       nd._groupX = cx;
-
-      nd.values.forEach((val, vi) => {
-        positioned.push({
-          nodeId: nd.id, val,
-          x: cx + vi * (bW + bGap),
-          y, blockW: bW, blockH: bH,
-        });
-      });
+      nd._bGap   = bGap;
 
       cx += gW + Math.max(12, nodeGap);
     });
   });
 
-  return { positioned, levels };
+  return { levels };
 }
 
 // ── draw ───────────────────────────────────────────────────────────────────
@@ -257,16 +385,14 @@ function drawBlock(x, y, w, h, val, colorKey) {
 function drawConnectors(levels, visibleIds, nodeStates) {
   ctx.save();
   ctx.setLineDash([4, 4]);
-
   for (let li = 0; li < levels.length - 1; li++) {
     levels[li].forEach(parent => {
       [parent.left, parent.right].forEach(child => {
         if (!child) return;
-        // Only draw if both parent and child are visible
         if (!visibleIds.has(parent.id) || !visibleIds.has(child.id)) return;
 
         const ps    = nodeStates.get(parent.id);
-        const alpha = (ps === 'done') ? 0.12 : 0.30;
+        const alpha = (ps === 'done') ? 0.10 : 0.28;
         ctx.strokeStyle = `rgba(139,92,246,${alpha})`;
         ctx.lineWidth   = 1.5;
 
@@ -290,7 +416,7 @@ function draw() {
   const n = array.length;
   if (n === 0) return;
 
-  // Idle — just top row, no tree built yet
+  // Idle — no tree yet
   if (!treeRoot) {
     const { blockW, blockH, gap, startX } = blockMetrics(n, W);
     array.forEach((val, i) =>
@@ -299,17 +425,29 @@ function draw() {
     return;
   }
 
-  const { positioned, levels } = layoutTree(treeRoot, W, H);
-
+  const { levels } = layoutTree(treeRoot, W, H);
   const step       = steps[stepIndex] || steps[0];
-  const visibleIds = step ? step.visibleIds : new Set([treeRoot.id]);
-  const nodeStates = step ? step.nodeStates : new Map([[treeRoot.id, 'idle']]);
+  if (!step) return;
+
+  const { visibleIds, nodeStates, blockColors, nodeValues } = step;
 
   drawConnectors(levels, visibleIds, nodeStates);
 
-  positioned.forEach(({ nodeId, val, x, y, blockW, blockH }) => {
-    if (!visibleIds.has(nodeId)) return;
-    drawBlock(x, y, blockW, blockH, val, nodeStates.get(nodeId) || 'idle');
+  // Draw each visible node's blocks
+  levels.forEach(levelNodes => {
+    levelNodes.forEach(nd => {
+      if (!visibleIds.has(nd.id)) return;
+
+      const vals    = nodeValues.get(nd.id) || nd.origValues;
+      const bcArr   = blockColors.get(nd.id);  // null or array of colorKeys
+      const defKey  = nodeStates.get(nd.id) || 'idle';
+
+      vals.forEach((val, vi) => {
+        const colorKey = (bcArr && bcArr[vi] != null) ? bcArr[vi] : defKey;
+        const x = nd._groupX + vi * (nd._bW + nd._bGap);
+        drawBlock(x, nd._y, nd._bW, nd._bH, val, colorKey);
+      });
+    });
   });
 }
 
@@ -320,9 +458,11 @@ function applyStep(idx) {
 
   statStatus.textContent = step.label;
   statDepth.textContent  = treeDepth(treeRoot) - 1;
+  if (step.cmp     !== undefined) statCmp.textContent    = step.cmp;
+  if (step.merges  !== undefined) statMerges.textContent = step.merges;
+
   btnPrev.disabled = stepIndex <= 0;
   btnNext.disabled = stepIndex >= steps.length - 1;
-
   draw();
 }
 
@@ -350,16 +490,18 @@ function setMode(mode) {
     btnPrev.disabled = stepIndex <= 0;
     btnNext.disabled = stepIndex >= steps.length - 1;
   }
-  if (mode === 'done') statStatus.textContent = 'Deconstructed ✓ — ready to merge';
+  if (mode === 'done') statStatus.textContent = 'Fully sorted ✓';
 }
 
 // ── reset ──────────────────────────────────────────────────────────────────
 function resetState() {
   stopAnim();
-  treeRoot  = null;
-  steps     = [];
-  stepIndex = -1;
-  _uid      = 0;
+  treeRoot   = null;
+  steps      = [];
+  stepIndex  = -1;
+  _uid       = 0;
+  cmpCount   = 0;
+  mergeCount = 0;
   statCmp.textContent    = '0';
   statMerges.textContent = '0';
   statDepth.textContent  = '0';
@@ -408,12 +550,13 @@ btnSolve.addEventListener('click', () => {
     return;
   }
 
-  // Build tree on first solve press
   if (!treeRoot) {
-    _uid     = 0;
-    treeRoot = buildTree([...array]);
-    steps    = generateSteps(treeRoot);
-    stepIndex = 0;   // start at step 0 (root visible, idle)
+    _uid       = 0;
+    cmpCount   = 0;
+    mergeCount = 0;
+    treeRoot   = buildTree([...array]);
+    steps      = generateSteps(treeRoot);
+    stepIndex  = 0;
     statDepth.textContent = treeDepth(treeRoot) - 1;
   }
 
@@ -454,6 +597,5 @@ sliderN.value        = 8;
 sliderSpeed.value    = 10;
 valSpeed.textContent = '10×';
 valN.textContent     = '8';
-
 array = freshArray(8);
 resizeCanvas();
