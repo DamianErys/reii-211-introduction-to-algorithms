@@ -26,7 +26,13 @@
   * [Summations](study-units/unit-2/sections/6-summations.md)
   * [Logarithms and Their Applications](study-units/unit-2/sections/7-logs.md)
 * [Unit 3](study-units/unit-3/README.md)
-* [Unit 4](study-units/unit-4/README.md)
+* [Unit 4: Sorting](study-units/unit-4/README.md)
+  * [Applications of Sorting](study-units/unit-4/sections/1-applications-of-sorting.md)
+  * [Pragmatics of Sorting](study-units/unit-4/sections/2-pragmatics-of-sorting.md)
+  * [Heapsort: Fast Sorting via Data Structures](study-units/unit-4/sections/3-heapsort.md)
+  * [Mergesort: Sorting by Divide and Conquer](study-units/unit-4/sections/4-mergesort.md)
+  * [Quicksort: Sorting by Randomization](study-units/unit-4/sections/5-quicksort.md)
+  * [Distribution Sort: Sorting via Bucketing](study-units/unit-4/sections/6-distribution-sort.md)
 * [Unit 5](study-units/unit-5/README.md)
 
 ## Additional Content
