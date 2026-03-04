@@ -42,8 +42,22 @@ function resizeCanvas() {
 }
 
 // ── drawing ────────────────────────────────────────────────────────────────
-const NODE_R   = 26;   // circle radius
-const NODE_GAP = 18;   // gap between circles
+
+/** Work out block dimensions from canvas width and array length.
+ *  Keeps blocks square-ish, leaves 10 % margin each side,
+ *  and caps size so the tree levels below will have room. */
+function blockMetrics(n, canvasW) {
+  const usable  = canvasW * 0.88;          // 6 % padding each side
+  const GAP_RATIO = 0.25;                  // gap = 25 % of block width
+  // blockW + gap = usable / n  →  blockW = usable / (n * (1 + GAP_RATIO))
+  const rawW  = usable / (n * (1 + GAP_RATIO));
+  const blockW = Math.max(28, Math.min(64, rawW));  // clamp 28–64 px
+  const blockH = blockW;                            // square
+  const gap    = blockW * GAP_RATIO;
+  const totalW = n * blockW + (n - 1) * gap;
+  const startX = (canvasW - totalW) / 2;
+  return { blockW, blockH, gap, startX };
+}
 
 function draw() {
   const W = canvas.width;
@@ -53,18 +67,17 @@ function draw() {
   const n = array.length;
   if (n === 0) return;
 
-  const totalW = n * (NODE_R * 2) + (n - 1) * NODE_GAP;
-  const startX = (W - totalW) / 2 + NODE_R;
-  const centerY = NODE_R + 32; // top area with some breathing room
+  const { blockW, blockH, gap, startX } = blockMetrics(n, W);
+  const TOP_PAD = 28;
 
   array.forEach((val, i) => {
-    const cx = startX + i * (NODE_R * 2 + NODE_GAP);
-    const cy = centerY;
-    drawNode(cx, cy, val, 'default');
+    const x = startX + i * (blockW + gap);
+    const y = TOP_PAD;
+    drawBlock(x, y, blockW, blockH, val, 'default');
   });
 }
 
-function drawNode(cx, cy, val, state) {
+function drawBlock(x, y, w, h, val, state) {
   const colors = {
     default:   { fill: '#8b5cf6', stroke: '#6d28d9', text: '#fff' },
     sorted:    { fill: '#22c55e', stroke: '#16a34a', text: '#fff' },
@@ -73,34 +86,35 @@ function drawNode(cx, cy, val, state) {
     merging:   { fill: '#f97316', stroke: '#ea580c', text: '#fff' },
   };
   const c = colors[state] || colors.default;
+  const radius = 6;
 
   // shadow
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.18)';
-  ctx.shadowBlur  = 8;
+  ctx.shadowColor   = 'rgba(0,0,0,0.18)';
+  ctx.shadowBlur    = 7;
   ctx.shadowOffsetY = 3;
 
-  // circle
+  // rounded rect fill
   ctx.beginPath();
-  ctx.arc(cx, cy, NODE_R, 0, Math.PI * 2);
+  ctx.roundRect(x, y, w, h, radius);
   ctx.fillStyle = c.fill;
   ctx.fill();
-
   ctx.restore();
 
   // border
   ctx.beginPath();
-  ctx.arc(cx, cy, NODE_R, 0, Math.PI * 2);
+  ctx.roundRect(x, y, w, h, radius);
   ctx.strokeStyle = c.stroke;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 2;
   ctx.stroke();
 
-  // value text
+  // value text — scale font to block size
+  const fontSize = Math.max(9, Math.min(14, w * 0.35));
   ctx.fillStyle = c.text;
-  ctx.font = `bold ${NODE_R < 20 ? 11 : 13}px 'Segoe UI', sans-serif`;
+  ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(val, cx, cy);
+  ctx.fillText(val, x + w / 2, y + h / 2);
 }
 
 // ── init & events ──────────────────────────────────────────────────────────
