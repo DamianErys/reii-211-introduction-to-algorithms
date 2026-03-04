@@ -3,32 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Insertion Sort Visualizer</title>
+  <title>Merge Sort Visualizer — Basic</title>
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="../Sort.css" />
 </head>
 <body>
-
-  <h2>Insertion Sort Visualizer</h2>
-
-
+  <h2>Merge Sort Visualizer</h2>
   <div class="layout">
+
     <!-- Sidebar -->
     <div class="controls">
-
       <div class="control-group">
         <h3>Array</h3>
         <label>Entries: <span class="range-val" id="val-n">50</span></label>
         <input type="range" id="slider-n" min="1" max="250" value="50" />
       </div>
-
       <div class="control-group">
         <h3>Speed</h3>
         <label>Speed: <span class="range-val" id="val-speed">10×</span></label>
         <input type="range" id="slider-speed" min="1" max="100" value="10" />
-
       </div>
-
       <div class="control-group">
         <h3>Options</h3>
         <div class="checkbox-row">
@@ -36,16 +30,14 @@
           <label for="chk-stepwise">Stepwise mode</label>
         </div>
       </div>
-
       <div class="control-group">
         <h3>Stats</h3>
         <div class="stats">
           Comparisons: <span id="stat-cmp">0</span><br/>
-          Swaps: <span id="stat-swaps">0</span><br/>
+          Merges: <span id="stat-merges">0</span><br/>
           Status: <span id="stat-status">Ready</span>
         </div>
       </div>
-
       <div class="control-group">
         <div class="btn-group">
           <button id="btn-reset">⟳ Reset</button>
@@ -55,7 +47,6 @@
           <button id="btn-next" style="display:none;">▶ Next Step</button>
         </div>
       </div>
-
     </div>
 
     <!-- Canvas -->
@@ -74,35 +65,35 @@
       </div>
     </div>
     <div class="legend-item">
-      <div class="dot dot-outer"></div>
+      <div class="dot dot-left" style="background:#facc15;border:2px solid #a16207;"></div>
       <div class="legend-text">
-        <span class="legend-label">Outer pointer (i)</span>
-        <span class="legend-desc">Element being inserted</span>
+        <span class="legend-label">Left pointer</span>
+        <span class="legend-desc">Under comparison</span>
       </div>
     </div>
     <div class="legend-item">
-      <div class="dot dot-comparing"></div>
+      <div class="dot dot-right" style="background:#f472b6;"></div>
       <div class="legend-text">
-        <span class="legend-label">Inner pointer (j)</span>
-        <span class="legend-desc">Shifting left</span>
+        <span class="legend-label">Right pointer</span>
+        <span class="legend-desc">Under comparison</span>
       </div>
     </div>
     <div class="legend-item">
-      <div class="dot dot-minimum"></div>
+      <div class="dot dot-merging" style="background:#fb923c;"></div>
       <div class="legend-text">
-        <span class="legend-label">Comparing (j-1)</span>
-        <span class="legend-desc">Neighbour being checked</span>
+        <span class="legend-label">Merging</span>
+        <span class="legend-desc">Being placed into merged run</span>
       </div>
     </div>
     <div class="legend-item">
       <div class="dot dot-sorted"></div>
       <div class="legend-text">
         <span class="legend-label">Sorted</span>
-        <span class="legend-desc">Final position confirmed</span>
+        <span class="legend-desc">Final pass confirmed</span>
       </div>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="merge.js"></script>
 </body>
 </html>
