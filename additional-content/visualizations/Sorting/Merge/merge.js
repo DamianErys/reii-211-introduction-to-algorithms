@@ -31,19 +31,17 @@ const COLOR = {
 
 // ── Runtime state ────────────────────────────────────────────────────────────
 let array       = [];
+let original    = [];   // snapshot taken at buildArray time — reset restores this
 let n           = parseInt(sliderN.value);
 let running     = false;
 let comparisons = 0;
 let merges      = 0;
 
 // For draw coloring during live animation
-let leftPtr   = -1;   // index in original array of left element being compared
-let rightPtr  = -1;   // index of right element
-let mergeIdx  = -1;   // index being written back
-let mergeL    = -1;   // start of current merge window (for highlighting)
-let mergeR    = -1;   // end   of current merge window
-let runSize   = 0;    // current bottom-up run size
-let isFinal   = false;// true when runSize >= n (final pass — colour green)
+let leftPtr   = -1;
+let rightPtr  = -1;
+let mergeIdx  = -1;
+let sortedSet = new Set();  // indices confirmed in final position — turn green immediately
 
 // Stepwise
 let stepHistory = [];
@@ -51,20 +49,26 @@ let stepCursor  = -1;
 
 // ── Array helpers ────────────────────────────────────────────────────────────
 function buildArray(mode = 'reset') {
-  array = Array.from({ length: n }, (_, i) => i + 1);
-  if (mode === 'shuffle') {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+  if (mode === 'new' || mode === 'shuffle') {
+    array = Array.from({ length: n }, (_, i) => i + 1);
+    if (mode === 'shuffle') {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
     }
+    original = [...array];   // save for reset
+  } else {
+    // 'reset' — restore original, don't re-randomise
+    array = [...original];
   }
   resetState();
   draw();
 }
 
 function resetState() {
-  leftPtr = rightPtr = mergeIdx = mergeL = mergeR = -1;
-  runSize = 0; isFinal = false;
+  leftPtr = rightPtr = mergeIdx = -1;
+  sortedSet = new Set();
   comparisons = merges = 0;
   running = false;
   stepHistory = []; stepCursor = -1;
@@ -81,9 +85,9 @@ function updateStats(status) {
 
 function setButtons(sorting) {
   btnSolve.disabled   = sorting;
-  btnReset.disabled   = sorting;
   btnShuffle.disabled = sorting;
   sliderN.disabled    = sorting;
+  btnReset.disabled   = false;   // reset is always available
 }
 
 function syncStepwiseUI() {
@@ -111,11 +115,10 @@ function resizeCanvas() {
 }
 
 function barColor(idx) {
-  if (idx === leftPtr)  return COLOR.left;
-  if (idx === rightPtr) return COLOR.right;
-  if (idx === mergeIdx) return COLOR.merging;
-  // On the final pass everything in the current merge window is green
-  if (isFinal && idx >= mergeL && idx <= mergeR) return COLOR.sorted;
+  if (idx === leftPtr)       return COLOR.left;
+  if (idx === rightPtr)      return COLOR.right;
+  if (idx === mergeIdx)      return COLOR.merging;
+  if (sortedSet.has(idx))    return COLOR.sorted;
   return COLOR.default;
 }
 
@@ -158,30 +161,22 @@ function getDelay() {
 }
 
 // ── Bottom-up merge sort (async generator) ────────────────────────────────────
-// Iterative bottom-up: merge runs of size 1, then 2, then 4, ...
-// This maps perfectly to the bar graph — no recursion needed, each merge
-// window is a contiguous range which we can colour clearly.
-
 async function* mergeSortGen() {
   const s   = array;
   const len = s.length;
   const aux = [...s];
 
   for (let size = 1; size < len; size *= 2) {
-    runSize = size;
-    isFinal = (size * 2 >= len);  // next doubling would cover whole array
+    const isFinalPass = (size * 2 >= len);
 
     for (let left = 0; left < len; left += 2 * size) {
       const mid   = Math.min(left + size - 1, len - 1);
       const right = Math.min(left + 2 * size - 1, len - 1);
+      if (mid >= right) continue;
 
-      if (mid >= right) continue;   // nothing to merge
-
-      mergeL = left; mergeR = right;
       merges++;
       updateStats('Merging…');
 
-      // Copy window to aux
       for (let k = left; k <= right; k++) aux[k] = s[k];
 
       let i = left, j = mid + 1, k = left;
@@ -195,22 +190,30 @@ async function* mergeSortGen() {
 
         if (aux[i] <= aux[j]) {
           mergeIdx = k;
-          s[k++] = aux[i++];
+          s[k] = aux[i++];
+          if (isFinalPass) sortedSet.add(k);
+          k++;
         } else {
           mergeIdx = k;
-          s[k++] = aux[j++];
+          s[k] = aux[j++];
+          if (isFinalPass) sortedSet.add(k);
+          k++;
         }
         draw(); yield;
       }
 
       while (i <= mid) {
         leftPtr = i; rightPtr = -1; mergeIdx = k;
-        s[k++] = aux[i++];
+        s[k] = aux[i++];
+        if (isFinalPass) sortedSet.add(k);
+        k++;
         draw(); yield;
       }
       while (j <= right) {
         rightPtr = j; leftPtr = -1; mergeIdx = k;
-        s[k++] = aux[j++];
+        s[k] = aux[j++];
+        if (isFinalPass) sortedSet.add(k);
+        k++;
         draw(); yield;
       }
 
@@ -218,10 +221,6 @@ async function* mergeSortGen() {
       draw(); yield;
     }
   }
-
-  // Final: mark everything sorted green
-  isFinal = true; mergeL = 0; mergeR = len - 1;
-  leftPtr = rightPtr = mergeIdx = -1;
 }
 
 async function runSort() {
@@ -243,7 +242,7 @@ async function runSort() {
 
 function finishSort() {
   leftPtr = rightPtr = mergeIdx = -1;
-  isFinal = true; mergeL = 0; mergeR = array.length - 1;
+  for (let i = 0; i < array.length; i++) sortedSet.add(i);
   running = false;
   draw();
   updateStats('Done ✓');
@@ -251,27 +250,26 @@ function finishSort() {
 }
 
 // ── Step history (stepwise mode) ──────────────────────────────────────────────
-// Same bottom-up logic but records snapshots synchronously.
-
 function buildStepHistory() {
   const s   = [...array];
   const len = s.length;
   stepHistory = [];
   let cmp = 0, mrg = 0;
+  const ss = new Set();   // sorted set accumulates through history
 
-  function snap(status, lp, rp, mi, ml, mr, fin) {
+  function snap(status, lp, rp, mi) {
     stepHistory.push({
-      array:    [...s],
-      leftPtr:  lp,  rightPtr: rp, mergeIdx: mi,
-      mergeL:   ml,  mergeR:   mr, isFinal: fin,
+      array:      [...s],
+      leftPtr:    lp, rightPtr: rp, mergeIdx: mi,
+      sortedSet:  new Set(ss),
       comparisons: cmp, merges: mrg, status,
     });
   }
 
-  snap('Ready — press Next Step to begin', -1, -1, -1, -1, -1, false);
+  snap('Ready — press Next Step to begin', -1, -1, -1);
 
   for (let size = 1; size < len; size *= 2) {
-    const fin = (size * 2 >= len);
+    const isFinalPass = (size * 2 >= len);
 
     for (let left = 0; left < len; left += 2 * size) {
       const mid   = Math.min(left + size - 1, len - 1);
@@ -279,48 +277,47 @@ function buildStepHistory() {
       if (mid >= right) continue;
 
       mrg++;
-      snap(`Merging window [${left}…${mid}] + [${mid+1}…${right}]`,
-           -1, -1, -1, left, right, fin);
+      snap(`Merging window [${left}…${mid}] + [${mid+1}…${right}]`, -1, -1, -1);
 
       const aux = [...s];
       let i = left, j = mid + 1, k = left;
 
       while (i <= mid && j <= right) {
         cmp++;
-        snap(`Comparing s[${i}]=${aux[i]} vs s[${j}]=${aux[j]}`,
-             i, j, -1, left, right, fin);
+        snap(`Comparing s[${i}]=${aux[i]} vs s[${j}]=${aux[j]}`, i, j, -1);
 
         if (aux[i] <= aux[j]) {
           s[k] = aux[i];
-          snap(`${aux[i]} ≤ ${aux[j]} — place ${aux[i]} at position ${k}`,
-               i, j, k, left, right, fin);
+          if (isFinalPass) ss.add(k);
+          snap(`${aux[i]} ≤ ${aux[j]} — place ${aux[i]} at position ${k}`, i, j, k);
           i++; k++;
         } else {
           s[k] = aux[j];
-          snap(`${aux[j]} < ${aux[i]} — place ${aux[j]} at position ${k}`,
-               i, j, k, left, right, fin);
+          if (isFinalPass) ss.add(k);
+          snap(`${aux[j]} < ${aux[i]} — place ${aux[j]} at position ${k}`, i, j, k);
           j++; k++;
         }
       }
       while (i <= mid) {
         s[k] = aux[i];
-        snap(`Right exhausted — copy ${aux[i]} to position ${k}`,
-             i, -1, k, left, right, fin);
+        if (isFinalPass) ss.add(k);
+        snap(`Right exhausted — copy ${aux[i]} to position ${k}`, i, -1, k);
         i++; k++;
       }
       while (j <= right) {
         s[k] = aux[j];
-        snap(`Left exhausted — copy ${aux[j]} to position ${k}`,
-             -1, j, k, left, right, fin);
+        if (isFinalPass) ss.add(k);
+        snap(`Left exhausted — copy ${aux[j]} to position ${k}`, -1, j, k);
         j++; k++;
       }
 
-      snap(`Window [${left}…${right}] merged ✓`,
-           -1, -1, -1, left, right, fin);
+      snap(`Window [${left}…${right}] merged ✓`, -1, -1, -1);
     }
   }
 
-  snap('Done ✓ — array fully sorted!', -1, -1, -1, 0, len - 1, true);
+  // Final snap: all sorted
+  for (let i = 0; i < len; i++) ss.add(i);
+  snap('Done ✓ — array fully sorted!', -1, -1, -1);
 }
 
 function applySnapshot(snap) {
@@ -328,9 +325,7 @@ function applySnapshot(snap) {
   leftPtr     = snap.leftPtr;
   rightPtr    = snap.rightPtr;
   mergeIdx    = snap.mergeIdx;
-  mergeL      = snap.mergeL;
-  mergeR      = snap.mergeR;
-  isFinal     = snap.isFinal;
+  sortedSet   = new Set(snap.sortedSet);
   comparisons = snap.comparisons;
   merges      = snap.merges;
   updateStats(snap.status);
@@ -341,7 +336,7 @@ function applySnapshot(snap) {
 sliderN.addEventListener('input', () => {
   n = parseInt(sliderN.value);
   valN.textContent = n;
-  buildArray('reset');
+  buildArray('new');
 });
 
 sliderSpeed.addEventListener('input', () => {
@@ -354,7 +349,7 @@ chkStepwise.addEventListener('change', () => {
 });
 
 btnReset.addEventListener('click', () => {
-  n = parseInt(sliderN.value);
+  running = false;   // stop any running animation
   buildArray('reset');
 });
 
@@ -393,5 +388,5 @@ window.addEventListener('resize', () => {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 resizeCanvas();
-buildArray('reset');
+buildArray('new');
 syncStepwiseUI();
