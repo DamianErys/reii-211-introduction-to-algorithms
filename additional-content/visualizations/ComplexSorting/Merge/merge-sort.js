@@ -116,15 +116,14 @@ function treeDepth(node) {
 //   label       string
 
 function generateSteps(root) {
-  const list   = [];
+  const list     = [];
   const allNodes = collectNodes(root);
 
-  const visible     = new Set();
-  const nStates     = new Map();   // id → colorKey
-  const bColors     = new Map();   // id → val[] of colorKeys  (or null)
-  const nValues     = new Map();   // id → current display values
+  const visible  = new Set();
+  const nStates  = new Map();
+  const bColors  = new Map();
+  const nValues  = new Map();
 
-  // Initialise all nodes with their original values
   allNodes.forEach((nd, id) => nValues.set(id, [...nd.origValues]));
 
   function snap(label, extraStats = {}) {
@@ -132,30 +131,35 @@ function generateSteps(root) {
       visibleIds:  new Set(visible),
       nodeStates:  new Map(nStates),
       blockColors: new Map(bColors),
-      nodeValues:  new Map(Array.from(nValues.entries()).map(([k,v]) => [k,[...v]])),
+      nodeValues:  new Map(Array.from(nValues.entries()).map(([k, v]) => [k, [...v]])),
       label,
       ...extraStats,
     });
   }
 
-  // ── PHASE 1: deconstruction DFS ──────────────────────────────────────────
-  function splitDfs(node) {
-    if (node.values.length <= 1) {
-      nStates.set(node.id, 'active');
-      bColors.set(node.id, null);
-      snap(`[${node.values[0]}] — single element, base case reached`);
+  // Step 0: root alone, idle
+  visible.add(root.id);
+  nStates.set(root.id, 'idle');
+  bColors.set(root.id, null);
+  snap('Array ready — click Solve to begin');
 
+  // Single unified recursive function — mirrors actual merge sort execution
+  function mergeSort(node) {
+    // ── BASE CASE ──────────────────────────────────────────────────────────
+    if (!node.left && !node.right) {
+      nStates.set(node.id, 'active');
+      snap(`[${node.values[0]}] — single element, base case`);
       nStates.set(node.id, 'leaf');
       snap(`[${node.values[0]}] ✓`);
-      return;
+      return [...node.values];
     }
 
     const mid   = Math.floor(node.values.length / 2);
     const left  = node.values.slice(0, mid);
     const right = node.values.slice(mid);
 
+    // ── SPLIT THIS NODE ────────────────────────────────────────────────────
     nStates.set(node.id, 'active');
-    bColors.set(node.id, null);
     snap(`Splitting [${node.values.join(', ')}] → left: [${left.join(', ')}]  right: [${right.join(', ')}]`);
 
     nStates.set(node.id, 'split');
@@ -167,53 +171,25 @@ function generateSteps(root) {
     bColors.set(node.right.id, null);
     snap(`[${left.join(', ')}]  |  [${right.join(', ')}]`);
 
-    splitDfs(node.left);
-    splitDfs(node.right);
+    // ── RECURSE LEFT (split + merge all the way down) ──────────────────────
+    const leftSorted = mergeSort(node.left);
 
-    nStates.set(node.id, 'done');
-    bColors.set(node.id, null);
-    snap(`[${node.values.join(', ')}] fully split — ready to merge back`);
-  }
+    // ── RECURSE RIGHT (split + merge all the way down) ─────────────────────
+    const rightSorted = mergeSort(node.right);
 
-  // Step 0: root alone, idle
-  visible.add(root.id);
-  nStates.set(root.id, 'idle');
-  bColors.set(root.id, null);
-  snap('Array ready — click Solve to begin');
-
-  splitDfs(root);
-  snap('Deconstruction complete — beginning merge phase ↑');
-
-  // ── PHASE 2: merge DFS ───────────────────────────────────────────────────
-  // Returns sorted array for this node. Generates detailed steps.
-  function mergeDfs(node) {
-    if (!node.left && !node.right) {
-      // leaf — already sorted
-      nStates.set(node.id, 'sorted');
-      bColors.set(node.id, null);
-      return [...node.values];
-    }
-
-    // Recurse children first
-    const leftSorted  = mergeDfs(node.left);
-    const rightSorted = mergeDfs(node.right);
-
+    // ── MERGE ──────────────────────────────────────────────────────────────
     mergeCount++;
 
-    // Announce this merge
     nStates.set(node.id, 'merging');
-    // Show children with 'placed' colouring to indicate they're the source
     bColors.set(node.left.id,  leftSorted.map(() => 'placed'));
     bColors.set(node.right.id, rightSorted.map(() => 'placed'));
     nValues.set(node.left.id,  [...leftSorted]);
     nValues.set(node.right.id, [...rightSorted]);
-    // Parent is empty while being built — show no blocks yet via empty array
     nValues.set(node.id, []);
     bColors.set(node.id, []);
     snap(`Merging [${leftSorted.join(', ')}] + [${rightSorted.join(', ')}]`,
          { merges: mergeCount });
 
-    // Step through the merge
     const merged = [];
     let i = 0, j = 0;
 
@@ -222,8 +198,7 @@ function generateSteps(root) {
       const lVal = leftSorted[i];
       const rVal = rightSorted[j];
 
-      // Highlight the two pointers
-      const lColors = leftSorted.map((_, k) => k === i ? 'cmp_left'  : (k < i ? 'winner' : 'placed'));
+      const lColors = leftSorted.map((_, k)  => k === i ? 'cmp_left'  : (k < i ? 'winner' : 'placed'));
       const rColors = rightSorted.map((_, k) => k === j ? 'cmp_right' : (k < j ? 'winner' : 'placed'));
       bColors.set(node.left.id,  lColors);
       bColors.set(node.right.id, rColors);
@@ -232,19 +207,16 @@ function generateSteps(root) {
       snap(`Comparing ${lVal} (left) vs ${rVal} (right) — which is smaller?`,
            { cmp: cmpCount });
 
-      // Show the winner
       if (lVal <= rVal) {
         merged.push(lVal);
-        const lColorsAfter = leftSorted.map((_, k) => k === i ? 'winner' : (k < i ? 'winner' : 'placed'));
-        bColors.set(node.left.id, lColorsAfter);
+        bColors.set(node.left.id, leftSorted.map((_, k) => k <= i ? 'winner' : 'placed'));
         nValues.set(node.id, [...merged]);
         bColors.set(node.id, merged.map(() => 'winner'));
         snap(`${lVal} ≤ ${rVal} — take ${lVal} from left`, { cmp: cmpCount });
         i++;
       } else {
         merged.push(rVal);
-        const rColorsAfter = rightSorted.map((_, k) => k === j ? 'winner' : (k < j ? 'winner' : 'placed'));
-        bColors.set(node.right.id, rColorsAfter);
+        bColors.set(node.right.id, rightSorted.map((_, k) => k <= j ? 'winner' : 'placed'));
         nValues.set(node.id, [...merged]);
         bColors.set(node.id, merged.map(() => 'winner'));
         snap(`${rVal} < ${lVal} — take ${rVal} from right`, { cmp: cmpCount });
@@ -252,51 +224,43 @@ function generateSteps(root) {
       }
     }
 
-    // Drain remaining left
     while (i < leftSorted.length) {
       merged.push(leftSorted[i]);
-      const lColors = leftSorted.map((_, k) => k < i ? 'winner' : (k === i ? 'cmp_left' : 'placed'));
-      bColors.set(node.left.id, lColors);
+      bColors.set(node.left.id, leftSorted.map((_, k) => k <= i ? 'cmp_left' : 'placed'));
       nValues.set(node.id, [...merged]);
       bColors.set(node.id, merged.map(() => 'winner'));
       snap(`Right exhausted — append remaining left: ${leftSorted[i]}`, { cmp: cmpCount });
       i++;
     }
 
-    // Drain remaining right
     while (j < rightSorted.length) {
       merged.push(rightSorted[j]);
-      const rColors = rightSorted.map((_, k) => k < j ? 'winner' : (k === j ? 'cmp_right' : 'placed'));
-      bColors.set(node.right.id, rColors);
+      bColors.set(node.right.id, rightSorted.map((_, k) => k <= j ? 'cmp_right' : 'placed'));
       nValues.set(node.id, [...merged]);
       bColors.set(node.id, merged.map(() => 'winner'));
       snap(`Left exhausted — append remaining right: ${rightSorted[j]}`, { cmp: cmpCount });
       j++;
     }
 
-    // Merged result settled — mark node sorted, fade children
+    // Settle this node as sorted, fade children
     nValues.set(node.id, [...merged]);
     bColors.set(node.id, merged.map(() => 'sorted'));
     nStates.set(node.id, 'sorted');
     nStates.set(node.left.id,  'done');
     nStates.set(node.right.id, 'done');
-    bColors.set(node.left.id,  merged.slice(0, leftSorted.length).map(() => 'done'));
-    bColors.set(node.right.id, merged.slice(0, rightSorted.length).map(() => 'done'));
+    bColors.set(node.left.id,  leftSorted.map(() => 'done'));
+    bColors.set(node.right.id, rightSorted.map(() => 'done'));
     snap(`Merged → [${merged.join(', ')}] ✓`, { cmp: cmpCount, merges: mergeCount });
 
-    // Update the node's display values for future reference
     node.values = [...merged];
-
     return merged;
   }
 
-  mergeDfs(root);
-
+  mergeSort(root);
   snap('Array fully sorted! ✓', { cmp: cmpCount, merges: mergeCount });
 
   return list;
 }
-
 // ── layout ─────────────────────────────────────────────────────────────────
 function layoutTree(root, W, H) {
   const depth   = treeDepth(root);
