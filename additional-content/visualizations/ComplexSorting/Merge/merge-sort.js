@@ -16,6 +16,7 @@ const statCmp     = document.getElementById('stat-cmp');
 const statMerges  = document.getElementById('stat-merges');
 const statDepth   = document.getElementById('stat-depth');
 const statStatus  = document.getElementById('stat-status');
+const btnReverse  = document.getElementById('btn-reverse');
 
 // ── colour palette ─────────────────────────────────────────────────────────
 // Deconstruction colours
@@ -59,12 +60,11 @@ let mergeCount = 0;
 
 // ── helpers ────────────────────────────────────────────────────────────────
 function freshArray(n) {
-  const vals = [], used = new Set();
-  while (vals.length < n) {
-    const v = Math.floor(Math.random() * 98) + 1;
-    if (!used.has(v)) { used.add(v); vals.push(v); }
-  }
-  return vals.sort((a, b) => a - b);
+  return Array.from({ length: n }, (_, i) => i + 1);
+}
+
+function reverseArr(arr) {
+  return [...arr].reverse();
 }
 
 function shuffleArr(arr) {
@@ -445,6 +445,7 @@ function setMode(mode) {
   uiMode = mode;
   btnSolve.textContent = (mode === 'playing') ? '⏸ Pause' : '▶ Solve';
   btnShuffle.disabled  = (mode === 'playing');
+  btnReverse.disabled = (mode === 'playing');
   sliderN.disabled     = (mode === 'playing');
 
   const showStep = ['stepwise','paused','done'].includes(mode);
@@ -496,6 +497,12 @@ sliderSpeed.addEventListener('input', () => {
 btnShuffle.addEventListener('click', () => {
   resetState();
   array = shuffleArr(array);
+  draw();
+});
+
+btnReverse.addEventListener('click', () => {
+  resetState();
+  array = reverseArr(array);
   draw();
 });
 

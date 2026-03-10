@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Insertion Sort Visualizer</title>
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="../Sort.css" />
 </head>
+
 <body>
 
   <h2>Insertion Sort Visualizer</h2>
@@ -37,25 +39,26 @@
         </div>
       </div>
 
-      <div class="control-group">
-        <h3>Stats</h3>
-        <div class="stats">
-          Comparisons: <span id="stat-cmp">0</span><br/>
-          Swaps: <span id="stat-swaps">0</span><br/>
-          Status: <span id="stat-status">Ready</span>
-        </div>
-      </div>
+
 
       <div class="control-group">
         <div class="btn-group">
           <button id="btn-reset">⟳ Reset</button>
           <button id="btn-shuffle">⇄ Shuffle</button>
+          <button id="btn-reverse" style="background:#f97316;">↕ Reverse</button>
           <button id="btn-solve">▶ Solve</button>
           <button id="btn-prev" style="display:none;">◀ Prev Step</button>
           <button id="btn-next" style="display:none;">▶ Next Step</button>
         </div>
       </div>
-
+      <div class="control-group">
+        <h3>Stats</h3>
+        <div class="stats">
+          Comparisons: <span id="stat-cmp">0</span><br />
+          Swaps: <span id="stat-swaps">0</span><br />
+          Status: <span id="stat-status">Ready</span>
+        </div>
+      </div>
     </div>
 
     <!-- Canvas -->
@@ -104,5 +107,7 @@
   </div>
 
   <script src="script.js"></script>
+  <script src="../Sort.js"></script>
 </body>
+
 </html>

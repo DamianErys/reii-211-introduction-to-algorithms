@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Merge Sort Visualizer</title>
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="../complex-sort.css" />
 </head>
+
 <body>
 
   <h2>Merge Sort Visualizer</h2>
@@ -20,7 +22,7 @@
       <div class="control-group">
         <h3>Array</h3>
         <label>Entries: <span class="range-val" id="val-n">10</span></label>
-        <input type="range" id="slider-n" min="2" max="64" value="10" />
+        <input type="range" id="slider-n" min="2" max="32" value="10" />
       </div>
 
       <div class="control-group">
@@ -39,22 +41,23 @@
       </div>
 
       <div class="control-group">
-        <h3>Stats</h3>
-        <div class="stats">
-          Comparisons: <span id="stat-cmp">0</span><br/>
-          Merges: <span id="stat-merges">0</span><br/>
-          Depth: <span id="stat-depth">0</span><br/>
-          Status: <span id="stat-status">Ready</span>
+        <div class="btn-group">
+          <button id="btn-reset">⟳ Reset</button>
+          <button id="btn-shuffle">⇄ Shuffle</button>
+          <button id="btn-reverse" style="background:#f97316;">↕ Reverse</button>
+          <button id="btn-solve">▶ Solve</button>
+          <button id="btn-prev" style="display:none;">◀ Prev Step</button>
+          <button id="btn-next" style="display:none;">▶ Next Step</button>
         </div>
       </div>
 
       <div class="control-group">
-        <div class="btn-group">
-          <button id="btn-reset">⟳ Reset</button>
-          <button id="btn-shuffle">⇄ Shuffle</button>
-          <button id="btn-solve">▶ Solve</button>
-          <button id="btn-prev" style="display:none;">◀ Prev Step</button>
-          <button id="btn-next" style="display:none;">▶ Next Step</button>
+        <h3>Stats</h3>
+        <div class="stats">
+          Comparisons: <span id="stat-cmp">0</span><br />
+          Merges: <span id="stat-merges">0</span><br />
+          Depth: <span id="stat-depth">0</span><br />
+          Status: <span id="stat-status">Ready</span>
         </div>
       </div>
 
@@ -122,4 +125,5 @@
 
   <script src="merge-sort.js"></script>
 </body>
+
 </html>
