@@ -40,11 +40,15 @@ Selection sort is unusual among sorting algorithms in that it takes **exactly th
 
 Insertion sort works differently. It builds the sorted portion of the array one element at a time, taking each new element and **sliding it leftward** through the sorted region, swapping it with each predecessor that is larger, until it reaches its correct position. Elements do not jump to their final position in one step — they migrate there through a chain of adjacent swaps.
 ```c
-for (i = 1; i < n; i++) {
-    j = i;
-    while ((j > 0) && (s[j] < s[j-1])) {
-        swap(&s[j], &s[j-1]);
-        j = j - 1;
+void insertion_sort(item_type s[], int n) {
+    int i, j;
+
+    for (i = 1; i < n; i++) {
+        j = i;
+        while ((j > 0) && (s[j] < s[j - 1])) {
+            swap(&s[j], &s[j - 1]);
+            j = j - 1;
+        }
     }
 }
 ```
