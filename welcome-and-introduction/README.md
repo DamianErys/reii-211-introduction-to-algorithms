@@ -31,7 +31,7 @@ Use the cards below to jump into specific areas of the course.
 
 {% hint style="info" %}
 ### The Python Transition
-As of 2025, REII 211 has officially transitioned to **Python**. This change was made to allow us to focus more on algorithmic logic and less on low-level memory management.
+As of 2026, REII 211 has officially transitioned to **Python**. This change was made to allow us to focus more on algorithmic logic and less on low-level memory management.
 {% endhint %}
 
 {% flex %}

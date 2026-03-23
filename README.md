@@ -12,7 +12,7 @@ Welcome to REII 211! This course introduces you to the fundamental concepts of a
 
 {% hint style="warning" %}
 **Important Update: C → Python Transition**
-This module has recently transitioned from C to Python (as of 2025). We've prepared a Python onramp to ensure all students are ready, regardless of their prior programming experience.
+This module has recently transitioned from C to Python (as of 2026). We've prepared a Python onramp to ensure all students are ready, regardless of their prior programming experience.
 {% endhint %}
 
 ---
