@@ -39,16 +39,4 @@
 * [Overview](additional-content/README.md)
 * [Algorithm Visualizations](additional-content/visualizations/README.md)
 
-
-## Learning Materials
-
-* [Overview](learning-materials/README.md)
-* [Exam Preparation](learning-materials/exam-prep/README.md)
-* [Past Papers](learning-materials/past-papers/README.md)
-* [Extra Resources](learning-materials/extra-resources/README.md)
-
-## Practical Assignments
-
-* [Assignments](practical-assignments/README.md)
-
 ---
