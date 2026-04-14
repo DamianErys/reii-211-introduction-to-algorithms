@@ -1,5 +1,5 @@
 
-# 3.3 Dictionaries
+# Dictionaries
 
 A **dictionary** is an abstract data type that retrieves data items by content rather than by position. The three primary operations are:
 

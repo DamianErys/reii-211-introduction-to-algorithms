@@ -1,4 +1,4 @@
-# 3.1 Contiguous vs. Linked Data Structures
+# Contiguous vs. Linked Data Structures
 
 Every data structure is built on one of two physical foundations: a 
 **contiguous block of memory** (arrays) or **chunks of memory connected 

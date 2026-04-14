@@ -1,8 +1,5 @@
-Here's the full Chapter 3.2 content formatted for GitBook:
 
----
-
-# 3.2 Containers: Stacks and Queues
+# Containers: Stacks and Queues
 
 A **container** is an abstract data type that stores and retrieves data items independent of their content. This distinguishes them from *dictionaries* (Section 3.3), which retrieve based on key values.
 
