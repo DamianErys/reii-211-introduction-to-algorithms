@@ -1,183 +1,270 @@
-/* ── scriptarray.js ───────────────────────────────────────────────── */
+/* ── script.js ────────────────────────────────────────────────────── */
 
-// Array-specific step builders (moved from main file)
+// Global state
+let structure = 'array';        // 'array' | 'singly' | 'doubly'
+let arrayData = [];
+let singlyNodes = [];           // Used by scriptlink_s.js
 
-function buildInsertSteps(arr, value) {
-    const steps = [];
-    const working = [...arr];
+// Step-by-step system
+let allSteps = [];
+let currentStep = 0;
 
-    // Step 0: append at the end
-    working.push(value);
-    const newIdx = working.length - 1;
+// DOM references
+const dsDisplay      = document.getElementById('dsDisplay');
+const valueInput     = document.getElementById('valueInput');
+const visualiseCheck = document.getElementById('visualiseCheck');
+const stepControls   = document.getElementById('stepControls');
+const stepBackBtn    = document.getElementById('stepBackBtn');
+const stepForwardBtn = document.getElementById('stepForwardBtn');
+const stepMsg        = document.getElementById('stepMsg');
 
-    steps.push({
-        data: [...working],
-        highlights: { [newIdx]: 'state-comparing' },
-        msg: `Append ${value} at address ${toHex(newIdx + 1)}. Now bubble it left into sorted position.`
-    });
+// Constants
+const GRID_COLS = 12;
+const GRID_ROWS = 6;
+const GRID_SIZE = GRID_COLS * GRID_ROWS;
 
-    let i = newIdx;
+// ── Helpers ───────────────────────────────────────────────────────
 
-    while (i > 0 && working[i - 1] > working[i]) {
-        steps.push({
-            data: [...working],
-            highlights: { [i]: 'state-comparing', [i - 1]: 'state-comparing' },
-            msg: `Compare ${working[i - 1]} (${toHex(i)}) > ${working[i]} (${toHex(i + 1)}) → swap.`
-        });
-
-        [working[i - 1], working[i]] = [working[i], working[i - 1]];
-
-        steps.push({
-            data: [...working],
-            highlights: { [i]: 'state-swap', [i - 1]: 'state-swap' },
-            msg: `Swapped. ${value} is now at address ${toHex(i)}.`
-        });
-
-        i--;
-    }
-
-    steps.push({
-        data: [...working],
-        highlights: { [i]: 'state-inserted' },
-        msg: `${value} settled at address ${toHex(i + 1)}. Done.`
-    });
-
-    return steps;
+function toHex(n) {
+    return '0x' + n.toString(16).toUpperCase().padStart(2, '0');
 }
 
-function buildDeleteSteps(arr, value) {
-    const steps = [];
-    const working = [...arr];
+function setStepMsg(msg) {
+    stepMsg.textContent = msg || '';
+}
 
-    let foundIndex = -1;
+function clearAll() {
+    cancelAutoPlay();
+    arrayData   = [];
+    singlyNodes = [];
+    allSteps    = [];
+    currentStep = 0;
+    renderGrid([]);
+    updateStepButtons();
+    setStepMsg('');
+}
 
-    // Linear search
-    for (let i = 0; i < working.length; i++) {
-        steps.push({
-            data: [...working],
-            highlights: { [i]: 'state-comparing' },
-            msg: `Checking address ${toHex(i + 1)} for ${value}.`
-        });
+// ── Grid Management (Shared) ──────────────────────────────────────
 
-        if (working[i] === value) {
-            foundIndex = i;
-            steps.push({
-                data: [...working],
-                highlights: { [i]: 'state-found' },
-                msg: `Found ${value} at address ${toHex(i + 1)}.`
-            });
-            break;
+function initGrid() {
+    dsDisplay.innerHTML = '';   // Remove placeholder text
+
+    for (let i = 0; i < GRID_SIZE; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'mem-cell';
+
+        const addr = document.createElement('span');
+        addr.className = 'mem-addr';
+        addr.textContent = toHex(i + 1);
+        cell.appendChild(addr);
+
+        const val = document.createElement('span');
+        val.className = 'mem-value';
+        val.style.display = 'none';
+        cell.appendChild(val);
+
+        dsDisplay.appendChild(cell);
+    }
+}
+
+const STATE_CLASSES = ['state-comparing', 'state-swap', 'state-inserted', 'state-found', 'state-deleted'];
+
+function renderGrid(data, highlights = {}) {
+    const cells = dsDisplay.children;
+
+    for (let i = 0; i < GRID_SIZE; i++) {
+        const cell = cells[i];
+        if (!cell) continue;
+
+        const valEl = cell.querySelector('.mem-value');
+
+        cell.classList.remove(...STATE_CLASSES);
+
+        if (i < data.length) {
+            cell.classList.add('occupied');
+            valEl.textContent = data[i];
+            valEl.style.display = '';
+
+            if (highlights[i]) {
+                cell.classList.add(highlights[i]);
+            }
+        } else {
+            cell.classList.remove('occupied');
+            valEl.style.display = 'none';
+        }
+    }
+}
+
+// ── Auto-play ─────────────────────────────────────────────────────
+
+let autoPlayTimer = null;
+const AUTO_STEP_MS = 75;
+
+function cancelAutoPlay() {
+    if (autoPlayTimer) {
+        clearTimeout(autoPlayTimer);
+        autoPlayTimer = null;
+    }
+}
+
+function autoPlaySteps(steps) {
+    cancelAutoPlay();
+    allSteps = steps;
+    currentStep = 0;
+    applyStep(0);
+
+    function advance() {
+        if (currentStep < allSteps.length - 1) {
+            currentStep++;
+            applyStep(currentStep);
+            autoPlayTimer = setTimeout(advance, AUTO_STEP_MS);
+        } else {
+            // Final commit
+            if (structure === 'array') {
+                arrayData = [...allSteps[currentStep].data];
+            }
+            // singlyNodes is already committed inside buildSinglyInsertSteps
+            allSteps = [];
+            currentStep = 0;
+            autoPlayTimer = null;
         }
     }
 
-    if (foundIndex === -1) {
-        steps.push({
-            data: [...working],
-            highlights: {},
-            msg: `${value} not found. No deletion performed.`
-        });
-        return steps;
-    }
-
-    // Shift left
-    for (let i = foundIndex; i < working.length - 1; i++) {
-        steps.push({
-            data: [...working],
-            highlights: { [i]: 'state-comparing', [i + 1]: 'state-comparing' },
-            msg: `Move ${working[i + 1]} from ${toHex(i + 2)} → ${toHex(i + 1)}.`
-        });
-
-        working[i] = working[i + 1];
-
-        steps.push({
-            data: [...working],
-            highlights: { [i]: 'state-swap' },
-            msg: `Copied into position ${toHex(i + 1)}.`
-        });
-    }
-
-    // Remove last element
-    const lastIdx = working.length - 1;
-    steps.push({
-        data: [...working],
-        highlights: { [lastIdx]: 'state-deleted' },
-        msg: `Clearing last duplicate at ${toHex(lastIdx + 1)}.`
-    });
-
-    working.pop();
-
-    steps.push({
-        data: [...working],
-        highlights: {},
-        msg: `Deletion complete.`
-    });
-
-    return steps;
+    autoPlayTimer = setTimeout(advance, AUTO_STEP_MS);
 }
 
-// ── Attach Array-specific handlers ────────────────────────────────
+// ── Step System ───────────────────────────────────────────────────
 
-function setupArrayHandlers() {
+function applyStep(idx) {
+    if (idx < 0 || idx >= allSteps.length) return;
+    const s = allSteps[idx];
+
+    if (structure === 'singly') {
+        renderSinglyGrid();           // Use singly-specific render (defined in scriptlink_s.js)
+    } else {
+        renderGrid(s.data, s.highlights);
+    }
+
+    setStepMsg(s.msg);
+
+    if (idx === allSteps.length - 1) {
+        if (structure === 'array') {
+            arrayData = [...s.data];
+        }
+    }
+}
+
+function updateStepButtons() {
+    const active = allSteps.length > 0;
+    stepBackBtn.disabled    = !active || currentStep === 0;
+    stepForwardBtn.disabled = !active || currentStep >= allSteps.length - 1;
+}
+
+// Step button listeners
+stepForwardBtn.addEventListener('click', () => {
+    if (currentStep < allSteps.length - 1) {
+        currentStep++;
+        applyStep(currentStep);
+        updateStepButtons();
+    }
+});
+
+stepBackBtn.addEventListener('click', () => {
+    if (currentStep > 0) {
+        currentStep--;
+        applyStep(currentStep);
+        updateStepButtons();
+    }
+});
+
+// Visualise checkbox
+visualiseCheck.addEventListener('change', () => {
+    cancelAutoPlay();
+    stepControls.style.display = visualiseCheck.checked ? 'block' : 'none';
+    allSteps = [];
+    currentStep = 0;
+    updateStepButtons();
+    setStepMsg('');
+});
+
+// ── Centralized Operation Handlers ────────────────────────────────
+
+let currentInsertHandler = null;
+let currentDeleteHandler = null;
+
+function setupOperationHandlers() {
     const insertBtn = document.getElementById('insertBtn');
     const deleteBtn = document.getElementById('deleteBtn');
+    const searchBtn = document.getElementById('searchBtn'); // Added this
 
-    insertBtn.addEventListener('click', () => {
-        const raw = valueInput.value.trim();
-        if (raw === '') return valueInput.focus();
+    // Clear old listeners
+    const newInsert = () => handleAction('insert');
+    const newDelete = () => handleAction('delete');
+    const newSearch = () => handleAction('search');
 
-        const val = parseInt(raw, 10);
-        if (isNaN(val)) return valueInput.focus();
+    insertBtn.onclick = newInsert;
+    deleteBtn.onclick = newDelete;
+    searchBtn.onclick = newSearch;
+}
+function handleAction(type) {
+    const raw = valueInput.value.trim();
+    if (raw === '') { valueInput.focus(); return; }
+    const val = parseInt(raw, 10);
+    if (isNaN(val)) { valueInput.focus(); return; }
 
-        if (arrayData.length >= GRID_SIZE) {
-            setStepMsg(`Grid is full (max ${GRID_SIZE} values).`);
-            valueInput.value = '';
-            valueInput.focus();
-            return;
-        }
+    valueInput.value = '';
+    valueInput.focus();
 
-        valueInput.value = '';
-        valueInput.focus();
-
-        if (structure === 'array') {
-            const steps = buildInsertSteps(arrayData, val);
-
-            if (!visualiseCheck.checked) {
-                autoPlaySteps(steps);
-            } else {
-                cancelAutoPlay();
-                allSteps = steps;
-                currentStep = 0;
-                applyStep(0);
-                updateStepButtons();
-            }
-        }
-    });
-
-    deleteBtn.addEventListener('click', () => {
-        const raw = valueInput.value.trim();
-        if (raw === '') return valueInput.focus();
-
-        const val = parseInt(raw, 10);
-        if (isNaN(val)) return valueInput.focus();
-
-        valueInput.value = '';
-        valueInput.focus();
+    // Route to the specific structure handler
+    if (type === 'insert' && window.currentInsertHandlerForStructure) {
+        window.currentInsertHandlerForStructure(val);
+    } else if (type === 'delete' && window.currentDeleteHandlerForStructure) {
+        window.currentDeleteHandlerForStructure(val);
+    } else if (type === 'search' && window.currentSearchHandlerForStructure) {
+        window.currentSearchHandlerForStructure(val);
+    }
+}
+// Structure radio buttons
+document.querySelectorAll('input[name="structure"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        structure = radio.value;
+        clearAll();
 
         if (structure === 'array') {
-            const steps = buildDeleteSteps(arrayData, val);
-
-            if (!visualiseCheck.checked) {
-                autoPlaySteps(steps);
-            } else {
-                cancelAutoPlay();
-                allSteps = steps;
-                currentStep = 0;
-                applyStep(0);
-                updateStepButtons();
-            }
+            setStepMsg('Array mode ready. Insert values to begin.');
+        } else if (structure === 'singly') {
+            singlyNodes = [];
+            setStepMsg('Singly Linked List mode – Insert values to build the list');
+        } else if (structure === 'doubly') {
+            setStepMsg('Doubly Linked List – coming soon');
         }
+
+        refreshOperationHandlers();
     });
+});
+
+function refreshOperationHandlers() {
+    setupOperationHandlers();
 }
 
-// Initialize array handlers
-setupArrayHandlers();
+// Enter key support
+valueInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('insertBtn').click();
+    }
+});
+
+// Clear button
+document.getElementById('clearBtn').addEventListener('click', clearAll);
+
+// ── INITIALIZATION ────────────────────────────────────────────────
+
+window.addEventListener('load', () => {
+    initGrid();
+    renderGrid([]);
+    updateStepButtons();
+    setStepMsg('Array mode ready. Insert values to begin.');
+
+    setupOperationHandlers();     // Important: Set up insert/delete listeners
+});

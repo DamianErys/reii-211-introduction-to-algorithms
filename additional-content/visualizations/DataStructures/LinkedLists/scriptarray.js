@@ -181,3 +181,67 @@ function setupArrayHandlers() {
 
 // Initialize array handlers
 setupArrayHandlers();
+
+
+function buildSearchSteps(arr, value) {
+    const steps = [];
+    let found = false;
+
+    for (let i = 0; i < arr.length; i++) {
+        steps.push({
+            data: [...arr],
+            highlights: { [i]: 'state-comparing' },
+            msg: `Searching: checking address ${toHex(i + 1)}...`
+        });
+
+        if (arr[i] === value) {
+            steps.push({
+                data: [...arr],
+                highlights: { [i]: 'state-found' },
+                msg: `Match found at address ${toHex(i + 1)}!`
+            });
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        steps.push({
+            data: [...arr],
+            highlights: {},
+            msg: `${value} not found in the array.`
+        });
+    }
+    return steps;
+}
+
+// Register the handlers globally so script.js can see them
+window.currentInsertHandlerForStructure = (val) => {
+    if (structure !== 'array') return;
+    const steps = buildInsertSteps(arrayData, val);
+    executeSteps(steps);
+};
+
+window.currentDeleteHandlerForStructure = (val) => {
+    if (structure !== 'array') return;
+    const steps = buildDeleteSteps(arrayData, val);
+    executeSteps(steps);
+};
+
+window.currentSearchHandlerForStructure = (val) => {
+    if (structure !== 'array') return;
+    const steps = buildSearchSteps(arrayData, val);
+    executeSteps(steps);
+};
+
+function executeSteps(steps) {
+    if (!visualiseCheck.checked) {
+        autoPlaySteps(steps);
+    } else {
+        cancelAutoPlay();
+        allSteps = steps;
+        currentStep = 0;
+        applyStep(0);
+        updateStepButtons();
+    }
+}
