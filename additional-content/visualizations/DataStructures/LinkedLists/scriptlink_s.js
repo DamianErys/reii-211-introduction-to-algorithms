@@ -82,52 +82,165 @@ function renderSinglyGrid(data = null) {
     }
 }
 
+// ── Build steps for Delete ────────────────────────────────────────
+
+function buildSinglyDeleteSteps(value) {
+    const steps = [];
+    const working = [...singlyNodes];
+
+    // Linear search
+    let foundIdx = -1;
+    for (let i = 0; i < working.length; i++) {
+        steps.push({
+            nodes: [...working],
+            highlights: { [i]: 'state-comparing' },
+            msg: `Checking node at ${toHex(working[i].address)}: value is ${working[i].value}.`
+        });
+
+        if (working[i].value === value) {
+            foundIdx = i;
+            steps.push({
+                nodes: [...working],
+                highlights: { [i]: 'state-found' },
+                msg: `Found ${value} at ${toHex(working[i].address)}.`
+            });
+            break;
+        }
+    }
+
+    if (foundIdx === -1) {
+        steps.push({
+            nodes: [...working],
+            highlights: {},
+            msg: `${value} not found in the list.`
+        });
+        return steps;
+    }
+
+    // Show pointer update on previous node (if not head)
+    if (foundIdx > 0) {
+        const prevNode = working[foundIdx - 1];
+        const nextAddr = foundIdx + 1 < working.length ? toHex(working[foundIdx + 1].address) : 'NULL';
+        steps.push({
+            nodes: [...working],
+            highlights: { [foundIdx - 1]: 'state-swap', [foundIdx]: 'state-deleted' },
+            msg: `Update pointer of node ${prevNode.value} (${toHex(prevNode.address)}) to skip deleted node → ${nextAddr}.`
+        });
+    } else {
+        steps.push({
+            nodes: [...working],
+            highlights: { [foundIdx]: 'state-deleted' },
+            msg: `Removing head node. Head now points to ${foundIdx + 1 < working.length ? toHex(working[foundIdx + 1].address) : 'NULL'}.`
+        });
+    }
+
+    // Remove the node and repack addresses
+    working.splice(foundIdx, 1);
+    working.forEach((n, i) => { n.address = i + 1; });
+
+    steps.push({
+        nodes: [...working],
+        highlights: {},
+        msg: `Node deleted. List now has ${working.length} node${working.length !== 1 ? 's' : ''}.`
+    });
+
+    singlyNodes = working;
+    return steps;
+}
+
+// ── Build steps for Search ────────────────────────────────────────
+
+function buildSinglySearchSteps(value) {
+    const steps = [];
+    const working = [...singlyNodes];
+
+    for (let i = 0; i < working.length; i++) {
+        steps.push({
+            nodes: [...working],
+            highlights: { [i]: 'state-comparing' },
+            msg: `Checking node at ${toHex(working[i].address)}: value is ${working[i].value}.`
+        });
+
+        if (working[i].value === value) {
+            steps.push({
+                nodes: [...working],
+                highlights: { [i]: 'state-found' },
+                msg: `Found ${value} at address ${toHex(working[i].address)}!`
+            });
+            return steps;
+        }
+
+        if (i < working.length - 1) {
+            steps.push({
+                nodes: [...working],
+                highlights: { [i]: 'state-swap' },
+                msg: `${working[i].value} ≠ ${value}. Following pointer to ${toHex(working[i + 1].address)}.`
+            });
+        }
+    }
+
+    steps.push({
+        nodes: [...working],
+        highlights: {},
+        msg: `${value} not found in the list.`
+    });
+    return steps;
+}
+
 // ── Apply step for singly mode ────────────────────────────────────
 function applySinglyStep(idx) {
     if (idx < 0 || idx >= allSteps.length) return;
 
     const s = allSteps[idx];
 
-    renderSinglyGrid();           // Always render current list state
+    // Steps from delete/search carry a .nodes snapshot; insert steps use singlyNodes directly
+    if (s.nodes) {
+        renderSinglyGrid(s.nodes.map(n => n.value));
+    } else {
+        renderSinglyGrid();
+    }
+
     setStepMsg(s.msg);
 
-    // Apply temporary highlights for animation
     if (s.highlights) {
         const cells = dsDisplay.children;
         Object.keys(s.highlights).forEach(key => {
             const i = parseInt(key);
-            if (cells[i]) {
-                cells[i].classList.add(s.highlights[i]);
-            }
+            if (cells[i]) cells[i].classList.add(s.highlights[i]);
         });
     }
 }
 
 // ── Register handlers for the centralized system ──────────────────
+// Called by script.js refreshOperationHandlers() when switching to singly mode.
 function setupSinglyHandlers() {
-    // === THIS IS THE KEY PART ===
-    window.currentInsertHandlerForStructure = (value) => {
-        if (structure !== 'singly') return;
-
-        const steps = buildSinglyInsertSteps(value);
-
+    const run = (steps) => {
         if (!visualiseCheck.checked) {
-            autoPlaySteps(steps);           // uses shared autoPlay
+            autoPlaySteps(steps);
         } else {
             cancelAutoPlay();
             allSteps = steps;
             currentStep = 0;
-            applySinglyStep(0);             // use singly render + step
+            applySinglyStep(0);
             updateStepButtons();
         }
     };
 
+    window.currentInsertHandlerForStructure = (value) => {
+        run(buildSinglyInsertSteps(value));
+    };
+
     window.currentDeleteHandlerForStructure = (value) => {
-        if (structure === 'singly') {
-            setStepMsg('Delete not implemented for Singly Linked List yet.');
-        }
+        if (singlyNodes.length === 0) { setStepMsg('List is empty.'); return; }
+        run(buildSinglyDeleteSteps(value));
+    };
+
+    window.currentSearchHandlerForStructure = (value) => {
+        if (singlyNodes.length === 0) { setStepMsg('List is empty.'); return; }
+        run(buildSinglySearchSteps(value));
     };
 }
 
-// Initialize
-setupSinglyHandlers();
+// NOTE: Do NOT call setupSinglyHandlers() here at load time.
+// script.js calls refreshOperationHandlers() which calls setupSinglyHandlers()
+// only when the user switches to singly mode.

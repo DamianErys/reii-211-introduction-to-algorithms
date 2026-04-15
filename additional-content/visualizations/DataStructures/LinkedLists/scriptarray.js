@@ -115,75 +115,30 @@ function buildDeleteSteps(arr, value) {
     return steps;
 }
 
-// ── Attach Array-specific handlers ────────────────────────────────
-
+// Called by script.js refreshOperationHandlers() when switching to array mode.
 function setupArrayHandlers() {
-    const insertBtn = document.getElementById('insertBtn');
-    const deleteBtn = document.getElementById('deleteBtn');
-
-    insertBtn.addEventListener('click', () => {
-        const raw = valueInput.value.trim();
-        if (raw === '') return valueInput.focus();
-
-        const val = parseInt(raw, 10);
-        if (isNaN(val)) return valueInput.focus();
-
+    window.currentInsertHandlerForStructure = (val) => {
         if (arrayData.length >= GRID_SIZE) {
             setStepMsg(`Grid is full (max ${GRID_SIZE} values).`);
-            valueInput.value = '';
-            valueInput.focus();
             return;
         }
+        const steps = buildInsertSteps(arrayData, val);
+        executeSteps(steps);
+    };
 
-        valueInput.value = '';
-        valueInput.focus();
+    window.currentDeleteHandlerForStructure = (val) => {
+        const steps = buildDeleteSteps(arrayData, val);
+        executeSteps(steps);
+    };
 
-        if (structure === 'array') {
-            const steps = buildInsertSteps(arrayData, val);
-
-            if (!visualiseCheck.checked) {
-                autoPlaySteps(steps);
-            } else {
-                cancelAutoPlay();
-                allSteps = steps;
-                currentStep = 0;
-                applyStep(0);
-                updateStepButtons();
-            }
-        }
-    });
-
-    deleteBtn.addEventListener('click', () => {
-        const raw = valueInput.value.trim();
-        if (raw === '') return valueInput.focus();
-
-        const val = parseInt(raw, 10);
-        if (isNaN(val)) return valueInput.focus();
-
-        valueInput.value = '';
-        valueInput.focus();
-
-        if (structure === 'array') {
-            const steps = buildDeleteSteps(arrayData, val);
-
-            if (!visualiseCheck.checked) {
-                autoPlaySteps(steps);
-            } else {
-                cancelAutoPlay();
-                allSteps = steps;
-                currentStep = 0;
-                applyStep(0);
-                updateStepButtons();
-            }
-        }
-    });
+    window.currentSearchHandlerForStructure = (val) => {
+        const steps = buildBinarySearchSteps(arrayData, val);
+        executeSteps(steps);
+    };
 }
 
-// Initialize array handlers
+// Set array as the default active handler (page loads in array mode)
 setupArrayHandlers();
-
-
-/* ── scriptarray.js ───────────────────────────────────────────────── */
 
 function buildBinarySearchSteps(arr, value) {
     const steps = [];
@@ -233,25 +188,6 @@ function buildBinarySearchSteps(arr, value) {
     });
     return steps;
 }
-
-// Register the handlers globally so script.js can see them
-window.currentInsertHandlerForStructure = (val) => {
-    if (structure !== 'array') return;
-    const steps = buildInsertSteps(arrayData, val);
-    executeSteps(steps);
-};
-
-window.currentDeleteHandlerForStructure = (val) => {
-    if (structure !== 'array') return;
-    const steps = buildDeleteSteps(arrayData, val);
-    executeSteps(steps);
-};
-
-window.currentSearchHandlerForStructure = (val) => {
-    if (structure !== 'array') return;
-    const steps = buildBinarySearchSteps(arrayData, val);
-    executeSteps(steps);
-};
 
 function executeSteps(steps) {
     if (!visualiseCheck.checked) {

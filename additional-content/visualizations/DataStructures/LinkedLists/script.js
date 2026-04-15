@@ -39,7 +39,12 @@ function clearAll() {
     singlyNodes = [];
     allSteps    = [];
     currentStep = 0;
-    renderGrid([]);
+    // renderSinglyGrid cleans up .mem-ptr elements; plain renderGrid does not
+    if (structure === 'singly') {
+        renderSinglyGrid();
+    } else {
+        renderGrid([]);
+    }
     updateStepButtons();
     setStepMsg('');
 }
@@ -144,20 +149,11 @@ function applyStep(idx) {
     const s = allSteps[idx];
 
     if (structure === 'singly') {
-        renderSinglyGrid();
-        // Apply highlights on top of the rendered grid
-        if (s.highlights) {
-            const cells = dsDisplay.children;
-            Object.keys(s.highlights).forEach(key => {
-                const i = parseInt(key);
-                if (cells[i]) cells[i].classList.add(s.highlights[i]);
-            });
-        }
+        applySinglyStep(idx);   // handles .nodes snapshots + highlights
     } else {
         renderGrid(s.data, s.highlights);
+        setStepMsg(s.msg);
     }
-
-    setStepMsg(s.msg);
 
     if (idx === allSteps.length - 1) {
         if (structure === 'array') {
@@ -256,7 +252,15 @@ document.querySelectorAll('input[name="structure"]').forEach(radio => {
 });
 
 function refreshOperationHandlers() {
-    setupOperationHandlers();
+    setupOperationHandlers();   // re-wires button onclick
+
+    // Swap in the correct window handlers for the active structure
+    if (structure === 'array') {
+        setupArrayHandlers();
+    } else if (structure === 'singly') {
+        setupSinglyHandlers();
+    }
+    // doubly: placeholder until implemented
 }
 
 // Enter key support
