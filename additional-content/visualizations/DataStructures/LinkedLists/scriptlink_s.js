@@ -1,58 +1,85 @@
 /* ── scriptlink_s.js ──────────────────────────────────────────────── */
-/* Singly Linked List - Append to end using fixed grid positions */
+/* Singly Linked List - Fixed memory with hole reuse on insert + append to logical end */
 
-const MAX_NODES = GRID_SIZE;    // 72
+const MAX_NODES = GRID_SIZE;
 
-// ── Build steps for Insert ────────────────────────────────────────
-/* ── scriptlink_s.js ──────────────────────────────────────────────── */
-// REMOVED: let singlyNodes = []; (Already declared in script.js)
+// Global helpers (already in script.js): singlyMemory, singlyHead, nextFreeIndex
 
+// ── Find first free slot (lowest index) ─────────────────────────────
+function findFirstFreeSlot() {
+    for (let i = 0; i < GRID_SIZE; i++) {
+        if (singlyMemory[i] === null) return i;
+    }
+    return -1;
+}
+
+// ── Build steps for Insert (now reuses holes) ───────────────────────
 function buildSinglyInsertSteps(value) {
     const steps = [];
-    // We work with the global singlyNodes from script.js
-    const working = [...singlyNodes]; 
-    const newIndex = working.length;
 
-    if (newIndex >= GRID_SIZE) {
-        steps.push({
-            data: working.map(n => n.value),
-            highlights: {},
-            msg: "Grid is full!"
-        });
-        return steps;
+    // Find slot for new node (prefer hole, else next free)
+    let newIndex = findFirstFreeSlot();
+    if (newIndex === -1) {
+        if (nextFreeIndex < GRID_SIZE) {
+            newIndex = nextFreeIndex;
+        } else {
+            steps.push({
+                snapshot: singlyMemory.map(n => n ? {...n} : null),
+                highlights: {},
+                msg: "Grid is full!"
+            });
+            return steps;
+        }
     }
 
-    const newNode = { value: value, address: newIndex + 1 };
-    working.push(newNode);
+    const newAddress = newIndex + 1;
+    const newNode = { value: value, next: null };
 
-    // Step 1: Show the new node being created
+    let workingMemory = singlyMemory.map(n => n ? {...n} : null);
+    workingMemory[newIndex] = newNode;
+
+    // Step 1: Create new node in its slot
     steps.push({
-        data: working.map(n => n.value),
+        snapshot: workingMemory.map(n => n ? {...n} : null),
         highlights: { [newIndex]: 'state-inserted' },
-        msg: `Create new node with ${value} at address ${toHex(newNode.address)}.`
+        msg: `Create new node with ${value} at address ${toHex(newAddress)}.`
     });
 
-    // Step 2: Show the pointer update if it's not the first node
-    if (working.length > 1) {
+    // Step 2: Link it to the end of the list (if list not empty)
+    if (singlyHead !== null) {
+        // Find current tail
+        let tailAddr = singlyHead;
+        let tailIdx = tailAddr - 1;
+
+        while (workingMemory[tailIdx].next !== null) {
+            tailAddr = workingMemory[tailIdx].next;
+            tailIdx = tailAddr - 1;
+        }
+
+        // Update tail pointer
+        workingMemory[tailIdx].next = newAddress;
+
         steps.push({
-            data: working.map(n => n.value),
-            highlights: { [newIndex - 1]: 'state-comparing', [newIndex]: 'state-inserted' },
-            msg: `Updating pointer of ${working[newIndex-1].value} to point to ${toHex(newNode.address)}.`
+            snapshot: workingMemory.map(n => n ? {...n} : null),
+            highlights: { [tailIdx]: 'state-comparing', [newIndex]: 'state-inserted' },
+            msg: `Append to end: Update pointer of last node (${workingMemory[tailIdx].value}) to ${toHex(newAddress)}.`
         });
+    } else {
+        // First node becomes head
+        singlyHead = newAddress;   // will be committed below
     }
 
-    // Crucial: Update the global variable before returning
-    singlyNodes = working; 
+    // Commit changes
+    singlyMemory = workingMemory;
+    if (newIndex === nextFreeIndex) nextFreeIndex++;
+
     return steps;
 }
 
-// ── Custom render with pointers ───────────────────────────────────
-/* --- scriptlink_s.js --- */
-
-function renderSinglyGrid(data = null) {
+// ── Render (unchanged - shows holes correctly) ─────────────────────
+function renderSinglyGrid(snapshot = null) {
     const cells = dsDisplay.children;
-    // Use the provided step data, or fall back to the global state
-    const displayData = data || singlyNodes.map(n => n.value);
+    const toRender = snapshot || singlyMemory;
 
     for (let i = 0; i < GRID_SIZE; i++) {
         const cell = cells[i];
@@ -64,16 +91,15 @@ function renderSinglyGrid(data = null) {
 
         cell.classList.remove(...STATE_CLASSES, 'occupied');
 
-        if (i < displayData.length) {
+        const node = toRender[i];
+        if (node !== null) {
             cell.classList.add('occupied');
-            valEl.textContent = displayData[i];
+            valEl.textContent = node.value;
             valEl.style.display = '';
 
             ptrEl = document.createElement('span');
             ptrEl.className = 'mem-ptr';
-
-            // Point to next index (i+1) or NULL
-            const nextAddr = (i < displayData.length - 1) ? toHex(i + 2) : 'NULL';
+            const nextAddr = node.next !== null ? toHex(node.next) : 'NULL';
             ptrEl.textContent = `→ ${nextAddr}`;
             cell.appendChild(ptrEl);
         } else {
@@ -82,120 +108,133 @@ function renderSinglyGrid(data = null) {
     }
 }
 
-// ── Build steps for Delete ────────────────────────────────────────
-
+// ── Delete (unchanged - leaves hole) ───────────────────────────────
 function buildSinglyDeleteSteps(value) {
     const steps = [];
-    const working = [...singlyNodes];
+    let workingMemory = singlyMemory.map(n => n ? {...n} : null);
 
-    // Linear search
-    let foundIdx = -1;
-    for (let i = 0; i < working.length; i++) {
-        steps.push({
-            nodes: [...working],
-            highlights: { [i]: 'state-comparing' },
-            msg: `Checking node at ${toHex(working[i].address)}: value is ${working[i].value}.`
-        });
-
-        if (working[i].value === value) {
-            foundIdx = i;
-            steps.push({
-                nodes: [...working],
-                highlights: { [i]: 'state-found' },
-                msg: `Found ${value} at ${toHex(working[i].address)}.`
-            });
-            break;
-        }
-    }
-
-    if (foundIdx === -1) {
-        steps.push({
-            nodes: [...working],
-            highlights: {},
-            msg: `${value} not found in the list.`
-        });
+    if (singlyHead === null) {
+        steps.push({ snapshot: workingMemory, highlights: {}, msg: "List is empty." });
         return steps;
     }
 
-    // Show pointer update on previous node (if not head)
-    if (foundIdx > 0) {
-        const prevNode = working[foundIdx - 1];
-        const nextAddr = foundIdx + 1 < working.length ? toHex(working[foundIdx + 1].address) : 'NULL';
+    let foundAddr = null;
+    let prevAddr = null;
+    let currentAddr = singlyHead;
+
+    while (currentAddr !== null) {
+        const currIdx = currentAddr - 1;
         steps.push({
-            nodes: [...working],
-            highlights: { [foundIdx - 1]: 'state-swap', [foundIdx]: 'state-deleted' },
-            msg: `Update pointer of node ${prevNode.value} (${toHex(prevNode.address)}) to skip deleted node → ${nextAddr}.`
+            snapshot: workingMemory.map(n => n ? {...n} : null),
+            highlights: { [currIdx]: 'state-comparing' },
+            msg: `Checking node at ${toHex(currentAddr)}: value is ${workingMemory[currIdx].value}.`
+        });
+
+        if (workingMemory[currIdx].value === value) {
+            foundAddr = currentAddr;
+            steps.push({
+                snapshot: workingMemory.map(n => n ? {...n} : null),
+                highlights: { [currIdx]: 'state-found' },
+                msg: `Found ${value} at ${toHex(currentAddr)}.`
+            });
+            break;
+        }
+
+        prevAddr = currentAddr;
+        currentAddr = workingMemory[currIdx].next;
+    }
+
+    if (foundAddr === null) {
+        steps.push({ snapshot: workingMemory, highlights: {}, msg: `${value} not found.` });
+        return steps;
+    }
+
+    const foundIdx = foundAddr - 1;
+    const nextAfter = workingMemory[foundIdx].next;
+
+    if (prevAddr === null) {
+        // Delete head
+        steps.push({
+            snapshot: workingMemory.map(n => n ? {...n} : null),
+            highlights: { [foundIdx]: 'state-deleted' },
+            msg: `Removing head. New head → ${nextAfter !== null ? toHex(nextAfter) : 'NULL'}.`
         });
     } else {
+        const prevIdx = prevAddr - 1;
+        workingMemory[prevIdx].next = nextAfter;
         steps.push({
-            nodes: [...working],
-            highlights: { [foundIdx]: 'state-deleted' },
-            msg: `Removing head node. Head now points to ${foundIdx + 1 < working.length ? toHex(working[foundIdx + 1].address) : 'NULL'}.`
+            snapshot: workingMemory.map(n => n ? {...n} : null),
+            highlights: { [prevIdx]: 'state-swap', [foundIdx]: 'state-deleted' },
+            msg: `Skip deleted node: ${workingMemory[prevIdx].value} now points to ${nextAfter !== null ? toHex(nextAfter) : 'NULL'}.`
         });
     }
 
-    // Remove the node and repack addresses
-    working.splice(foundIdx, 1);
-    working.forEach((n, i) => { n.address = i + 1; });
+    workingMemory[foundIdx] = null;
 
+    const remaining = workingMemory.filter(n => n !== null).length;
     steps.push({
-        nodes: [...working],
+        snapshot: workingMemory.map(n => n ? {...n} : null),
         highlights: {},
-        msg: `Node deleted. List now has ${working.length} node${working.length !== 1 ? 's' : ''}.`
+        msg: `Node deleted. ${remaining} node${remaining !== 1 ? 's' : ''} remain.`
     });
 
-    singlyNodes = working;
+    singlyHead = (prevAddr === null) ? nextAfter : singlyHead;
+    singlyMemory = workingMemory;
+
     return steps;
 }
 
-// ── Build steps for Search ────────────────────────────────────────
-
+// Search remains the same (traverses via pointers)
 function buildSinglySearchSteps(value) {
     const steps = [];
-    const working = [...singlyNodes];
+    const workingMemory = singlyMemory.map(n => n ? {...n} : null);
 
-    for (let i = 0; i < working.length; i++) {
+    if (singlyHead === null) {
+        steps.push({ snapshot: workingMemory, highlights: {}, msg: 'List is empty.' });
+        return steps;
+    }
+
+    let currentAddr = singlyHead;
+    while (currentAddr !== null) {
+        const currIdx = currentAddr - 1;
+        const node = workingMemory[currIdx];
+
         steps.push({
-            nodes: [...working],
-            highlights: { [i]: 'state-comparing' },
-            msg: `Checking node at ${toHex(working[i].address)}: value is ${working[i].value}.`
+            snapshot: workingMemory.map(n => n ? {...n} : null),
+            highlights: { [currIdx]: 'state-comparing' },
+            msg: `Checking ${toHex(currentAddr)}: ${node.value}`
         });
 
-        if (working[i].value === value) {
+        if (node.value === value) {
             steps.push({
-                nodes: [...working],
-                highlights: { [i]: 'state-found' },
-                msg: `Found ${value} at address ${toHex(working[i].address)}!`
+                snapshot: workingMemory.map(n => n ? {...n} : null),
+                highlights: { [currIdx]: 'state-found' },
+                msg: `Found ${value} at ${toHex(currentAddr)}!`
             });
             return steps;
         }
 
-        if (i < working.length - 1) {
+        if (node.next) {
             steps.push({
-                nodes: [...working],
-                highlights: { [i]: 'state-swap' },
-                msg: `${working[i].value} ≠ ${value}. Following pointer to ${toHex(working[i + 1].address)}.`
+                snapshot: workingMemory.map(n => n ? {...n} : null),
+                highlights: { [currIdx]: 'state-swap' },
+                msg: `≠ ${value}. Follow pointer → ${toHex(node.next)}`
             });
         }
+        currentAddr = node.next;
     }
 
-    steps.push({
-        nodes: [...working],
-        highlights: {},
-        msg: `${value} not found in the list.`
-    });
+    steps.push({ snapshot: workingMemory, highlights: {}, msg: `${value} not found.` });
     return steps;
 }
 
-// ── Apply step for singly mode ────────────────────────────────────
+// Apply step (unchanged)
 function applySinglyStep(idx) {
     if (idx < 0 || idx >= allSteps.length) return;
-
     const s = allSteps[idx];
 
-    // Steps from delete/search carry a .nodes snapshot; insert steps use singlyNodes directly
-    if (s.nodes) {
-        renderSinglyGrid(s.nodes.map(n => n.value));
+    if (s.snapshot) {
+        renderSinglyGrid(s.snapshot);
     } else {
         renderSinglyGrid();
     }
@@ -211,8 +250,7 @@ function applySinglyStep(idx) {
     }
 }
 
-// ── Register handlers for the centralized system ──────────────────
-// Called by script.js refreshOperationHandlers() when switching to singly mode.
+// Setup handlers (unchanged)
 function setupSinglyHandlers() {
     const run = (steps) => {
         if (!visualiseCheck.checked) {
@@ -226,21 +264,13 @@ function setupSinglyHandlers() {
         }
     };
 
-    window.currentInsertHandlerForStructure = (value) => {
-        run(buildSinglyInsertSteps(value));
-    };
-
+    window.currentInsertHandlerForStructure = (value) => run(buildSinglyInsertSteps(value));
     window.currentDeleteHandlerForStructure = (value) => {
-        if (singlyNodes.length === 0) { setStepMsg('List is empty.'); return; }
+        if (singlyHead === null) { setStepMsg('List is empty.'); return; }
         run(buildSinglyDeleteSteps(value));
     };
-
     window.currentSearchHandlerForStructure = (value) => {
-        if (singlyNodes.length === 0) { setStepMsg('List is empty.'); return; }
+        if (singlyHead === null) { setStepMsg('List is empty.'); return; }
         run(buildSinglySearchSteps(value));
     };
 }
-
-// NOTE: Do NOT call setupSinglyHandlers() here at load time.
-// script.js calls refreshOperationHandlers() which calls setupSinglyHandlers()
-// only when the user switches to singly mode.

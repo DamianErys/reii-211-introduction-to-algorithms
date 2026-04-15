@@ -1,27 +1,29 @@
 /* ── script.js ────────────────────────────────────────────────────── */
-
+// Constants
+const GRID_COLS = 12;
+const GRID_ROWS = 6;
+const GRID_SIZE = GRID_COLS * GRID_ROWS;
 // Global state
 let structure = 'array';        // 'array' | 'singly' | 'doubly'
 let arrayData = [];
-let singlyNodes = [];           // Used by scriptlink_s.js
+let singlyMemory = new Array(GRID_SIZE).fill(null);
+let singlyHead = null;
+let nextFreeIndex = 0;
 
 // Step-by-step system
 let allSteps = [];
 let currentStep = 0;
 
 // DOM references
-const dsDisplay      = document.getElementById('dsDisplay');
-const valueInput     = document.getElementById('valueInput');
+const dsDisplay = document.getElementById('dsDisplay');
+const valueInput = document.getElementById('valueInput');
 const visualiseCheck = document.getElementById('visualiseCheck');
-const stepControls   = document.getElementById('stepControls');
-const stepBackBtn    = document.getElementById('stepBackBtn');
+const stepControls = document.getElementById('stepControls');
+const stepBackBtn = document.getElementById('stepBackBtn');
 const stepForwardBtn = document.getElementById('stepForwardBtn');
-const stepMsg        = document.getElementById('stepMsg');
+const stepMsg = document.getElementById('stepMsg');
 
-// Constants
-const GRID_COLS = 12;
-const GRID_ROWS = 6;
-const GRID_SIZE = GRID_COLS * GRID_ROWS;
+
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -35,9 +37,11 @@ function setStepMsg(msg) {
 
 function clearAll() {
     cancelAutoPlay();
-    arrayData   = [];
-    singlyNodes = [];
-    allSteps    = [];
+    arrayData = [];
+    singlyMemory = new Array(GRID_SIZE).fill(null);
+    singlyHead = null;
+    nextFreeIndex = 0;
+    allSteps = [];
     currentStep = 0;
     // renderSinglyGrid cleans up .mem-ptr elements; plain renderGrid does not
     if (structure === 'singly') {
@@ -164,7 +168,7 @@ function applyStep(idx) {
 
 function updateStepButtons() {
     const active = allSteps.length > 0;
-    stepBackBtn.disabled    = !active || currentStep === 0;
+    stepBackBtn.disabled = !active || currentStep === 0;
     stepForwardBtn.disabled = !active || currentStep >= allSteps.length - 1;
 }
 
@@ -241,7 +245,9 @@ document.querySelectorAll('input[name="structure"]').forEach(radio => {
         if (structure === 'array') {
             setStepMsg('Array mode ready. Insert values to begin.');
         } else if (structure === 'singly') {
-            singlyNodes = [];
+            singlyMemory = new Array(GRID_SIZE).fill(null);
+            singlyHead = null;
+            nextFreeIndex = 0;
             setStepMsg('Singly Linked List mode – Insert values to build the list');
         } else if (structure === 'doubly') {
             setStepMsg('Doubly Linked List – coming soon');
