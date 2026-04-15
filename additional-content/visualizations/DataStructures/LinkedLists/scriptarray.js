@@ -183,35 +183,54 @@ function setupArrayHandlers() {
 setupArrayHandlers();
 
 
-function buildSearchSteps(arr, value) {
-    const steps = [];
-    let found = false;
+/* ── scriptarray.js ───────────────────────────────────────────────── */
 
-    for (let i = 0; i < arr.length; i++) {
+function buildBinarySearchSteps(arr, value) {
+    const steps = [];
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        
+        // Highlight the range and the midpoint
         steps.push({
             data: [...arr],
-            highlights: { [i]: 'state-comparing' },
-            msg: `Searching: checking address ${toHex(i + 1)}...`
+            highlights: { [mid]: 'state-comparing', [left]: 'state-swap', [right]: 'state-swap' },
+            msg: `Binary Search: Checking midpoint at index ${mid} (${toHex(mid + 1)}).`
         });
 
-        if (arr[i] === value) {
+        if (arr[mid] === value) {
             steps.push({
                 data: [...arr],
-                highlights: { [i]: 'state-found' },
-                msg: `Match found at address ${toHex(i + 1)}!`
+                highlights: { [mid]: 'state-found' },
+                msg: `Found ${value} at address ${toHex(mid + 1)}!`
             });
-            found = true;
-            break;
+            return steps;
+        }
+
+        if (arr[mid] < value) {
+            steps.push({
+                data: [...arr],
+                highlights: { [mid]: 'state-comparing' },
+                msg: `${arr[mid]} < ${value}. Searching the right half.`
+            });
+            left = mid + 1;
+        } else {
+            steps.push({
+                data: [...arr],
+                highlights: { [mid]: 'state-comparing' },
+                msg: `${arr[mid]} > ${value}. Searching the left half.`
+            });
+            right = mid - 1;
         }
     }
 
-    if (!found) {
-        steps.push({
-            data: [...arr],
-            highlights: {},
-            msg: `${value} not found in the array.`
-        });
-    }
+    steps.push({
+        data: [...arr],
+        highlights: {},
+        msg: `${value} not found in the array.`
+    });
     return steps;
 }
 
@@ -230,7 +249,7 @@ window.currentDeleteHandlerForStructure = (val) => {
 
 window.currentSearchHandlerForStructure = (val) => {
     if (structure !== 'array') return;
-    const steps = buildSearchSteps(arrayData, val);
+    const steps = buildBinarySearchSteps(arrayData, val);
     executeSteps(steps);
 };
 

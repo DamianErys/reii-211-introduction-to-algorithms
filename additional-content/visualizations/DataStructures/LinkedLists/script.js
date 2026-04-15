@@ -123,7 +123,11 @@ function autoPlaySteps(steps) {
             if (structure === 'array') {
                 arrayData = [...allSteps[currentStep].data];
             }
-            // singlyNodes is already committed inside buildSinglyInsertSteps
+            // singlyNodes already committed inside buildSinglyInsertSteps;
+            // do a clean final render so highlights are cleared
+            if (structure === 'singly') {
+                renderSinglyGrid();
+            }
             allSteps = [];
             currentStep = 0;
             autoPlayTimer = null;
@@ -140,7 +144,15 @@ function applyStep(idx) {
     const s = allSteps[idx];
 
     if (structure === 'singly') {
-        renderSinglyGrid();           // Use singly-specific render (defined in scriptlink_s.js)
+        renderSinglyGrid();
+        // Apply highlights on top of the rendered grid
+        if (s.highlights) {
+            const cells = dsDisplay.children;
+            Object.keys(s.highlights).forEach(key => {
+                const i = parseInt(key);
+                if (cells[i]) cells[i].classList.add(s.highlights[i]);
+            });
+        }
     } else {
         renderGrid(s.data, s.highlights);
     }

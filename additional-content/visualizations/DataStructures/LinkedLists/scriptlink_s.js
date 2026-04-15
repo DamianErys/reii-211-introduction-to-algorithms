@@ -1,56 +1,48 @@
 /* ── scriptlink_s.js ──────────────────────────────────────────────── */
 /* Singly Linked List - Append to end using fixed grid positions */
 
-let singlyNodes = [];           // Global: array of {value, address}
 const MAX_NODES = GRID_SIZE;    // 72
 
 // ── Build steps for Insert ────────────────────────────────────────
+/* ── scriptlink_s.js ──────────────────────────────────────────────── */
+// REMOVED: let singlyNodes = []; (Already declared in script.js)
+
 function buildSinglyInsertSteps(value) {
     const steps = [];
-    const working = [...singlyNodes];
-
+    // We work with the global singlyNodes from script.js
+    const working = [...singlyNodes]; 
     const newIndex = working.length;
 
-    if (newIndex >= MAX_NODES) {
+    if (newIndex >= GRID_SIZE) {
         steps.push({
             data: working.map(n => n.value),
             highlights: {},
-            msg: `Grid is full (max ${MAX_NODES} nodes). Cannot insert ${value}.`
+            msg: "Grid is full!"
         });
         return steps;
     }
 
-    const newAddress = newIndex + 1;
-
-    const newNode = { value: value, address: newAddress };
-
+    const newNode = { value: value, address: newIndex + 1 };
     working.push(newNode);
 
-    // Step: Create new node
+    // Step 1: Show the new node being created
     steps.push({
         data: working.map(n => n.value),
         highlights: { [newIndex]: 'state-inserted' },
-        msg: `Create new node with ${value} at address ${toHex(newAddress)}.`
+        msg: `Create new node with ${value} at address ${toHex(newNode.address)}.`
     });
 
-    // Step: Update previous node's pointer (if not first node)
+    // Step 2: Show the pointer update if it's not the first node
     if (working.length > 1) {
-        const prevIndex = working.length - 2;
         steps.push({
             data: working.map(n => n.value),
-            highlights: { [prevIndex]: 'state-comparing', [newIndex]: 'state-inserted' },
-            msg: `Update previous node pointer → ${toHex(newAddress)}`
+            highlights: { [newIndex - 1]: 'state-comparing', [newIndex]: 'state-inserted' },
+            msg: `Updating pointer of ${working[newIndex-1].value} to point to ${toHex(newNode.address)}.`
         });
     }
 
-    // Final step
-    steps.push({
-        data: working.map(n => n.value),
-        highlights: { [newIndex]: 'state-inserted' },
-        msg: `New node ${value} points to NULL. Insert complete.`
-    });
-
-    singlyNodes = working;
+    // Crucial: Update the global variable before returning
+    singlyNodes = working; 
     return steps;
 }
 
