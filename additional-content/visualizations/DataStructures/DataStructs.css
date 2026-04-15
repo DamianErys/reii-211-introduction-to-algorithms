@@ -88,179 +88,127 @@
   gap: 12px;
   min-width: 0;
 }
+/* ── Main memory grid display ────────────────────────────────────────── */
 
-/* The white display box — tall, scrollable vertically */
 #dsDisplay {
-  flex: 1 1 auto;
   background: white;
   border: 3px solid #a78bfa;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+  padding: 22px;
+
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 9px;
+
+  flex: 1;
+  width: 100%;
+  max-width: none;
+  height: 720px;           /* Increased height a bit for bigger cells */
+  min-height: 720px;
+
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Bigger, more comfortable memory cells */
+.mem-cell {
+  border: 3px solid #ddd6fe;
   border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  min-height: 520px;
-  max-height: calc(100vh - 280px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 32px 24px;
+  background: #faf9ff;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 32px;
+  justify-content: center;
   position: relative;
+  overflow: hidden;
+  transition: all 0.25s ease;
+  min-width: 0;
+  padding: 6px;               /* Extra internal space */
+  aspect-ratio: 1.2 / 1;      /* Slightly wider than tall for better text fit */
 }
 
-/* Centred placeholder when empty */
-#dsDisplay:has(.ds-placeholder) {
-  justify-content: center;
-}
-
-.ds-placeholder {
-  color: #c4b5fd;
-  font-size: 15px;
-  font-style: italic;
-  user-select: none;
-}
-
-/* ── Array row ──────────────────────────────────────────────────── */
-
-.array-row {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.array-cell {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #7c3aed;
-  border-right: none;
-  background: #f5f3ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
+/* Address label - top left */
+.mem-addr {
+  position: absolute;
+  top: 7px;
+  left: 9px;
+  font-size: 11px;
   font-weight: 700;
-  color: #6b21a8;
-  transition: background 0.25s, border-color 0.25s;
-  flex-shrink: 0;
+  color: #c4b5fd;
+  user-select: none;
+  line-height: 1;
 }
 
-.array-cell:first-child { border-radius: 8px 0 0 8px; }
-.array-cell:last-child  { border-radius: 0 8px 8px 0; border-right: 2px solid #7c3aed; }
-.array-cell:first-child:last-child { border-radius: 8px; border-right: 2px solid #7c3aed; }
+/* Main value - much bigger and clearer */
+.mem-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #6b21a8;
+  line-height: 1;
+  margin-top: 8px;
+}
 
-/* ── Shared state classes (array, linked list, trees) ───────────── */
+/* Pointer label (will be used later for linked lists) */
+.mem-ptr {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a78bfa;
+  margin-top: 6px;
+  line-height: 1;
+}
 
-.state-comparing {
+/* Occupied cell styling */
+.mem-cell.occupied {
+  background: #f5f3ff;
+  border-color: #7c3aed;
+}
+
+.mem-cell.occupied .mem-addr {
+  color: #a78bfa;
+}
+
+/* ── Shared state classes ───────────────────────────────────────── */
+
+.mem-cell.state-comparing {
   background: #fef9c3 !important;
   border-color: #f59e0b !important;
 }
+.mem-cell.state-comparing .mem-value { color: #92400e !important; }
 
-.state-swap {
+.mem-cell.state-swap {
   background: #ffedd5 !important;
   border-color: #f97316 !important;
 }
+.mem-cell.state-swap .mem-value { color: #9a3412 !important; }
 
-.state-inserted {
+.mem-cell.state-inserted,
+.mem-cell.state-found {
   background: #dcfce7 !important;
   border-color: #22c55e !important;
 }
+.mem-cell.state-inserted .mem-value,
+.mem-cell.state-found .mem-value { color: #14532d !important; }
 
-.state-found {
-  background: #dcfce7 !important;
-  border-color: #22c55e !important;
-}
-
-.state-deleted {
+.mem-cell.state-deleted {
   background: #fee2e2 !important;
   border-color: #ef4444 !important;
-  opacity: 0.6;
+  opacity: 0.75;
 }
 
-/* ── Linked list nodes ──────────────────────────────────────────── */
+/* ── Legacy array-row / node classes kept for reference ─────────── */
+/* These are no longer rendered but kept so partial JS refs don't   */
+/* throw errors during migration.                                    */
 
-.ds-node {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.node-box {
-  width: 60px;
-  height: 60px;
-  border: 2px solid #7c3aed;
-  border-radius: 8px;
-  background: #f5f3ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #6b21a8;
-  transition: background 0.25s, border-color 0.25s;
-  position: relative;
-  flex-shrink: 0;
-}
-
+.node-arrow,
+.node-null,
 .node-label {
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 10px;
-  font-weight: 700;
-  color: #7c3aed;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  display: none;
 }
 
-.node-arrow {
-  display: flex;
-  align-items: center;
-  padding: 0 6px;
-  color: #7c3aed;
-  font-size: 20px;
-  user-select: none;
-  flex-shrink: 0;
-}
-
-.node-null {
-  font-size: 13px;
-  font-weight: 700;
-  color: #9ca3af;
-  padding-left: 4px;
-  user-select: none;
-}
-
-/* Doubly: prev | val | next */
-.node-box.doubly {
-  width: 108px;
-  display: grid;
-  grid-template-columns: 30px 1fr 30px;
-  padding: 0;
-  overflow: hidden;
-}
-
-.node-prev,
-.node-next {
-  background: #ddd6fe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  color: #6b21a8;
-  height: 100%;
-}
-
-.node-prev { border-right: 1px solid #7c3aed; }
-.node-next { border-left:  1px solid #7c3aed; }
-
-.node-val {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
-  color: #6b21a8;
+.container {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 20px;
 }
