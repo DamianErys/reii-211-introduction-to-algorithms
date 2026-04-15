@@ -10,7 +10,7 @@ let currentStep = 0;
 /* ── Constants ────────────────────────────────────────────────── */
 
 const GRID_COLS = 12;
-const GRID_ROWS = 8;
+const GRID_ROWS = 6;
 const GRID_SIZE = GRID_COLS * GRID_ROWS;  
 
 /* ── DOM refs ─────────────────────────────────────────────────── */
@@ -104,7 +104,7 @@ function renderGrid(data, highlights = {}) {
 // jumping straight to the final state.
 
 let autoPlayTimer = null;
-const AUTO_STEP_MS = 150;   // delay between steps in ms
+const AUTO_STEP_MS = 75;   // delay between steps in ms
 
 function cancelAutoPlay() {
     if (autoPlayTimer !== null) {
@@ -181,6 +181,80 @@ function buildInsertSteps(arr, value) {
     return steps;
 }
 
+function buildDeleteSteps(arr, value) {
+    const steps = [];
+    const working = [...arr];
+
+    let foundIndex = -1;
+
+    // ── Step 1: linear search ──
+    for (let i = 0; i < working.length; i++) {
+        steps.push({
+            data: [...working],
+            highlights: { [i]: 'state-comparing' },
+            msg: `Checking address ${toHex(i + 1)} for ${value}.`
+        });
+
+        if (working[i] === value) {
+            foundIndex = i;
+
+            steps.push({
+                data: [...working],
+                highlights: { [i]: 'state-found' },
+                msg: `Found ${value} at address ${toHex(i + 1)}.`
+            });
+
+            break;
+        }
+    }
+
+    // ── Not found ──
+    if (foundIndex === -1) {
+        steps.push({
+            data: [...working],
+            highlights: {},
+            msg: `${value} not found. No deletion performed.`
+        });
+        return steps;
+    }
+
+    // ── Step 2: shift left ──
+    for (let i = foundIndex; i < working.length - 1; i++) {
+        steps.push({
+            data: [...working],
+            highlights: { [i]: 'state-comparing', [i + 1]: 'state-comparing' },
+            msg: `Move ${working[i + 1]} from ${toHex(i + 2)} → ${toHex(i + 1)}.`
+        });
+
+        working[i] = working[i + 1];
+
+        steps.push({
+            data: [...working],
+            highlights: { [i]: 'state-swap' },
+            msg: `Copied into position ${toHex(i + 1)}.`
+        });
+    }
+
+    // ── Step 3: remove last ──
+    const lastIdx = working.length - 1;
+
+    steps.push({
+        data: [...working],
+        highlights: { [lastIdx]: 'state-deleted' },
+        msg: `Clearing last duplicate at ${toHex(lastIdx + 1)}.`
+    });
+
+    working.pop();
+
+    steps.push({
+        data: [...working],
+        highlights: {},
+        msg: `Deletion complete.`
+    });
+
+    return steps;
+}
+
 /* ── Insert handler ───────────────────────────────────────────── */
 
 document.getElementById('insertBtn').addEventListener('click', () => {
@@ -217,6 +291,107 @@ document.getElementById('insertBtn').addEventListener('click', () => {
     // singly / doubly: coming soon
 });
 
+document.getElementById('deleteBtn').addEventListener('click', () => {
+    const raw = valueInput.value.trim();
+    if (raw === '') { valueInput.focus(); return; }
+
+    const val = parseInt(raw, 10);
+    if (isNaN(val)) { valueInput.focus(); return; }
+
+    valueInput.value = '';
+    valueInput.focus();
+
+    if (structure === 'array') {
+        const steps = buildDeleteSteps(arrayData, val);
+
+        if (!visualiseCheck.checked) {
+            autoPlaySteps(steps);
+        } else {
+            cancelAutoPlay();
+            allSteps = steps;
+            currentStep = 0;
+            applyStep(0);
+            updateStepButtons();
+        }
+    }
+});
+
+function buildBinarySearchSteps(arr, value) {
+    const steps = [];
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+
+        steps.push({
+            data: [...arr],
+            highlights: {
+                [mid]: 'state-comparing'
+            },
+            msg: `Check middle at ${toHex(mid + 1)} (value ${arr[mid]}).`
+        });
+
+        if (arr[mid] === value) {
+            steps.push({
+                data: [...arr],
+                highlights: { [mid]: 'state-found' },
+                msg: `Found ${value} at address ${toHex(mid + 1)}.`
+            });
+            return steps;
+        }
+
+        if (arr[mid] < value) {
+            steps.push({
+                data: [...arr],
+                highlights: { [mid]: 'state-comparing' },
+                msg: `${arr[mid]} < ${value} → search right half.`
+            });
+            left = mid + 1;
+        } else {
+            steps.push({
+                data: [...arr],
+                highlights: { [mid]: 'state-comparing' },
+                msg: `${arr[mid]} > ${value} → search left half.`
+            });
+            right = mid - 1;
+        }
+    }
+
+    steps.push({
+        data: [...arr],
+        highlights: {},
+        msg: `${value} not found in array.`
+    });
+
+    return steps;
+}
+
+document.getElementById('searchBtn').addEventListener('click', () => {
+    const raw = valueInput.value.trim();
+    if (raw === '') { valueInput.focus(); return; }
+
+    const val = parseInt(raw, 10);
+    if (isNaN(val)) { valueInput.focus(); return; }
+
+    valueInput.value = '';
+    valueInput.focus();
+
+    if (structure === 'array') {
+        const steps = buildBinarySearchSteps(arrayData, val);
+
+        if (!visualiseCheck.checked) {
+            autoPlaySteps(steps);
+        } else {
+            cancelAutoPlay();
+            allSteps = steps;
+            currentStep = 0;
+            applyStep(0);
+            updateStepButtons();
+        }
+    }
+});
+
 /* ── Step navigation ──────────────────────────────────────────── */
 
 function applyStep(idx) {
@@ -248,6 +423,7 @@ stepBackBtn.addEventListener('click', () => {
     }
 });
 
+
 function updateStepButtons() {
     const active = allSteps.length > 0;
     stepBackBtn.disabled    = !active || currentStep === 0;
@@ -272,6 +448,14 @@ document.querySelectorAll('input[name="structure"]').forEach(radio => {
         structure = radio.value;
         clearAll();
     });
+});
+
+
+valueInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();   // stops form-like behaviour
+        document.getElementById('insertBtn').click();
+    }
 });
 
 /* ── Clear button ─────────────────────────────────────────────── */

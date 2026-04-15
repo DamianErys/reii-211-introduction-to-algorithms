@@ -98,8 +98,8 @@
   padding: 22px;
 
   display: grid;
-  grid-template-columns: repeat(20, 1fr);
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(6, 1fr);
   gap: 9px;
 
   flex: 1;
@@ -114,40 +114,48 @@
 
 /* Bigger, more comfortable memory cells */
 .mem-cell {
-  border: 3px solid #ddd6fe;
-  border-radius: 10px;
+  border: 2px solid #ddd6fe;
+  border-radius: 12px;
   background: #faf9ff;
+
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+
   position: relative;
   overflow: hidden;
-  transition: all 0.25s ease;
-  min-width: 0;
-  padding: 6px;               /* Extra internal space */
-  aspect-ratio: 1.2 / 1;      /* Slightly wider than tall for better text fit */
+
+  transition: all 0.2s ease;
+  padding: 4px;
+
+  aspect-ratio: 1 / 1;   /* clean square cells */
 }
 
-/* Address label - top left */
+/* Address — subtle, background-like */
 .mem-addr {
   position: absolute;
-  top: 7px;
-  left: 9px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #c4b5fd;
+  top: 4px;
+  left: 6px;
+
+  font-size: 9px;
+  font-weight: 600;
+  color: #7f5fff;
+
+  opacity: 0.6;
   user-select: none;
-  line-height: 1;
 }
 
-/* Main value - much bigger and clearer */
+/* Value — main focus */
 .mem-value {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   color: #6b21a8;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   line-height: 1;
-  margin-top: 8px;
 }
 
 /* Pointer label (will be used later for linked lists) */
