@@ -38,7 +38,7 @@
   * [Naive Sorts](study-units/unit-4/sections/3-naive-sorting-algorithms.md)
   * [Mergesort: Sorting by Divide and Conquer](study-units/unit-4/sections/4-mergesort.md)
   * [Quicksort: Sorting by Randomization](study-units/unit-4/sections/5-quicksort.md)
-* [Unit 5](study-units/unit-5/README.md)
+* [Unit 5: Graphs](study-units/unit-5/README.md)
   * [Types of graphs](study-units/unit-5/1-types-of-grpahs.md)
   * [Graph datastructures](study-units/unit-5/2-graph-datastucts.md)
   * [Grpah traversal](study-units/unit-5/3-graph-traversal.md)
