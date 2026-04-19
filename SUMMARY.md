@@ -39,6 +39,14 @@
   * [Mergesort: Sorting by Divide and Conquer](study-units/unit-4/sections/4-mergesort.md)
   * [Quicksort: Sorting by Randomization](study-units/unit-4/sections/5-quicksort.md)
 * [Unit 5](study-units/unit-5/README.md)
+  * [Types of graphs](study-units/unit-5/1-types-of-grpahs.md)
+  * [Graph datastructures](study-units/unit-5/2-graph-datastucts.md)
+  * [Grpah traversal](study-units/unit-5/3-graph-traversal.md)
+  * [Breadth first search](study-units/unit-5/4-breadth-first-search.md)
+  * [Depth first search](study-units/unit-5/5-depth-first-search.md)
+  * [Applications of searching](study-units/unit-5/6-applications-of-searching.md)
+  * [Minimum spanning trees](study-units/unit-5/7-minimum-spanning-trees.md)
+  * [Shortest path algorithms](study-units/unit-5/8-shortest-path-algorithms.md)
 
 ## Additional Content
 
