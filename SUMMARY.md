@@ -41,7 +41,7 @@
 * [Unit 5: Graphs](study-units/unit-5/README.md)
   * [Types of graphs](study-units/unit-5/sections/1-types-of-graphs.md)
   * [Graph datastructures](study-units/unit-5/sections/2-graph-datastucts.md)
-  * [Grpah traversal](study-units/unit-5/sections/3-graph-traversal.md)
+  * [Graph traversal](study-units/unit-5/sections/3-graph-traversal.md)
   * [Breadth first search](study-units/unit-5/sections/4-breadth-first-search.md)
   * [Depth first search](study-units/unit-5/sections/5-depth-first-search.md)
   * [Applications of searching](study-units/unit-5/sections/6-applications-of-searching.md)
