@@ -410,4 +410,3 @@ def load_from_headed_csv(path, directed=False):
 {% hint style="info" %}
 **Choosing a representation:** For algorithm implementation (BFS, DFS, Dijkstra), convert your CSV adjacency dict into the `Graph` struct above. The CSV loaders above are ingestion utilities — use them to populate the canonical structure, not as a replacement for it.
 {% endhint %}
-```
