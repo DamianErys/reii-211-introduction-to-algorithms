@@ -44,7 +44,10 @@ function clearAll() {
     allSteps = [];
     currentStep = 0;
     // renderSinglyGrid cleans up .mem-ptr elements; plain renderGrid does not
-    if (structure === 'singly') {
+    if (structure === 'doubly') {
+        clearDoublyState();
+        renderDoublyGrid();
+    } else if (structure === 'singly') {
         renderSinglyGrid();
     } else {
         renderGrid([]);
@@ -137,6 +140,9 @@ function autoPlaySteps(steps) {
             if (structure === 'singly') {
                 renderSinglyGrid();
             }
+            if (structure === 'doubly') {
+                renderDoublyGrid();
+            }
             allSteps = [];
             currentStep = 0;
             autoPlayTimer = null;
@@ -153,7 +159,9 @@ function applyStep(idx) {
     const s = allSteps[idx];
 
     if (structure === 'singly') {
-        applySinglyStep(idx);   // handles .nodes snapshots + highlights
+        applySinglyStep(idx);
+    } else if (structure === 'doubly') {
+        applyDoublyStep(idx);
     } else {
         renderGrid(s.data, s.highlights);
         setStepMsg(s.msg);
@@ -250,7 +258,8 @@ document.querySelectorAll('input[name="structure"]').forEach(radio => {
             nextFreeIndex = 0;
             setStepMsg('Singly Linked List mode – Insert values to build the list');
         } else if (structure === 'doubly') {
-            setStepMsg('Doubly Linked List – coming soon');
+            clearDoublyState();
+            setStepMsg('Doubly Linked List mode – Insert values to build the list');
         }
 
         refreshOperationHandlers();
@@ -265,8 +274,9 @@ function refreshOperationHandlers() {
         setupArrayHandlers();
     } else if (structure === 'singly') {
         setupSinglyHandlers();
+    } else if (structure === 'doubly') {
+        setupDoublyHandlers();
     }
-    // doubly: placeholder until implemented
 }
 
 // Enter key support
