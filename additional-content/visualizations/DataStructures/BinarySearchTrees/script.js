@@ -54,13 +54,26 @@ function stepDelay() {
   return Math.round(900 * Math.pow(30 / 900, (s - 1) / 19));
 }
 
+// ── Deep clone the tree so each snapshot is fully independent ───────────────
+function cloneTree(node) {
+  if (!node) return null;
+  return {
+    val:   node.val,
+    id:    node.id,
+    x:     node.x,
+    y:     node.y,
+    left:  cloneTree(node.left),
+    right: cloneTree(node.right),
+  };
+}
+
 // A step snapshot:
-//   states  Map<id, colorKey>
-//   root    node reference (same live tree — layout recomputed on draw)
-//   msg     string
+//   states    Map<id, colorKey>  — highlight state for each node at this moment
+//   treeRoot  cloned tree        — independent copy of the tree at this moment
+//   msg       string
 
 function snapState(stateMap, msg) {
-  return { states: new Map(stateMap), treeRoot: root, msg };
+  return { states: new Map(stateMap), treeRoot: cloneTree(root), msg };
 }
 
 // ── BST operations (build step arrays) ──────────────────────────────────────
@@ -411,11 +424,26 @@ function nodeRadius() {
   return Math.max(18, Math.min(30, canvas.width / 28));
 }
 
+function countNodes(node) {
+  if (!node) return 0;
+  return 1 + countNodes(node.left) + countNodes(node.right);
+}
+
+// Draw from a live root + statemap (used for idle/clear redraws)
 function draw(stateMap) {
+  drawTree(root, stateMap);
+}
+
+// Draw from a step snapshot's own cloned tree
+function drawFromSnapshot(snap) {
+  drawTree(snap.treeRoot, snap.states);
+}
+
+function drawTree(treeRef, stateMap) {
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  if (!root) {
+  if (!treeRef) {
     ctx.fillStyle = '#c4b5fd';
     ctx.font      = 'bold 15px "Segoe UI", sans-serif';
     ctx.textAlign    = 'center';
@@ -424,13 +452,13 @@ function draw(stateMap) {
     return;
   }
 
-  const h        = treeHeight(root);
+  const h        = treeHeight(treeRef);
   const levelGap = Math.min(90, (H - 60) / Math.max(h, 1));
   const r        = nodeRadius();
   const counter  = { val: 0 };
-  layoutTree(root, 0, counter, levelGap, r);
+  layoutTree(treeRef, 0, counter, levelGap, r);
 
-  const allNodes = collectAll(root);
+  const allNodes = collectAll(treeRef);
 
   // Centre the tree horizontally
   const minX = Math.min(...allNodes.map(n => n.x));
@@ -458,12 +486,18 @@ function draw(stateMap) {
 function applyStep(idx) {
   stepIndex = Math.max(0, Math.min(idx, steps.length - 1));
   const s   = steps[stepIndex];
-  root      = s.treeRoot;   // always the live tree reference
 
-  draw(s.states);
+  // Draw using the snapshot's own tree clone — never overwrite the live root mid-animation
+  drawFromSnapshot(s);
   setStepMsg(s.msg);
-  updateStats();
 
+  // Commit the final tree to root only on the last step
+  if (stepIndex === steps.length - 1) {
+    root      = s.treeRoot;
+    nodeCount = countNodes(root);
+  }
+
+  updateStats();
   btnPrev.disabled = stepIndex <= 0;
   btnNext.disabled = stepIndex >= steps.length - 1;
 }
@@ -514,8 +548,10 @@ function setStepMsg(msg) {
 }
 
 function updateStats() {
-  statNodes.textContent  = nodeCount;
-  statHeight.textContent = root ? treeHeight(root) : '—';
+  // During animation use the snapshot tree for height; after commit, use root
+  const displayRoot = steps[stepIndex] ? steps[stepIndex].treeRoot : root;
+  statNodes.textContent  = countNodes(displayRoot);
+  statHeight.textContent = displayRoot ? treeHeight(displayRoot) : '—';
   statCmp.textContent    = cmpCount;
 }
 
