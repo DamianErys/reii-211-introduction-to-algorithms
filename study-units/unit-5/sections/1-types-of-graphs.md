@@ -34,8 +34,7 @@ A **self-loop** is an edge (x, x) connecting a vertex to itself. A **multiedge**
 
 ## Sparse vs. Dense
 
-A graph is **sparse** when only a small fraction of possible vertex pairs have edges. A **dense** graph has a large fraction of possible edges present. A **complete** graph contains every possible edge; for a simple undirected graph on n vertices, that is $\binom{n}{2} = \frac{n^2 - n}{2}$ edges.
-
+A graph is **sparse** when only a small fraction of possible vertex pairs have edges. A **dense** graph has a large fraction of possible edges present. A **complete** graph contains every possible edge.
 There is no strict boundary, but:
 
 | Type | Edge count |
