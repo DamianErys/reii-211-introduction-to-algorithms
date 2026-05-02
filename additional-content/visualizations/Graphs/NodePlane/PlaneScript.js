@@ -25,8 +25,8 @@
   const ctx    = canvas.getContext('2d');
 
   /* World bounds */
-  const WORLD_W = 500;
-  const WORLD_H = 250;
+  const WORLD_W = 100;
+  const WORLD_H = 50;
 
   /* Visual constants */
   const NODE_R        = 18;   // node circle radius (px)
@@ -45,15 +45,19 @@
   let _nid  = 0;
   let _eid  = 0;
 
+  /* Canvas padding (px) — keeps axis labels from being clipped */
+  const PAD_L = 28;   // left  (Y labels)
+  const PAD_B = 18;   // bottom (X labels)
+  const PAD_R = 10;
+  const PAD_T = 10;
+
   /* ── Sizing ─────────────────────────────────────────────────────────────── */
-  /* The canvas fills the #plane-wrapper minus the info text.
-     We keep an aspect ratio of WORLD_W : WORLD_H = 2 : 1             */
+  /* The canvas fills the #plane-wrapper at 2:1 aspect ratio             */
   function sizeCanvas() {
     const wrapper = document.getElementById('plane-wrapper');
-    const maxW    = wrapper.clientWidth - 24;   // 12px padding each side
-    const maxH    = window.innerHeight * 0.62;
+    const maxW    = wrapper.clientWidth - 24;
+    const maxH    = window.innerHeight * 0.72;
 
-    /* Pick the largest size that fits both dimensions at 2:1 ratio */
     let w = maxW;
     let h = w / 2;
     if (h > maxH) { h = maxH; w = h * 2; }
@@ -64,19 +68,25 @@
   }
 
   /* ── Coordinate transforms ──────────────────────────────────────────────── */
+  /* Maps world coords → canvas pixels, respecting padding */
   function toCanvas(wx, wy) {
+    const drawW = canvas.width  - PAD_L - PAD_R;
+    const drawH = canvas.height - PAD_T - PAD_B;
     return {
-      x: (wx / WORLD_W) * canvas.width,
-      y: canvas.height - (wy / WORLD_H) * canvas.height
+      x: PAD_L + (wx / WORLD_W) * drawW,
+      y: PAD_T + drawH - (wy / WORLD_H) * drawH
     };
   }
 
   /* ── Grid drawing ───────────────────────────────────────────────────────── */
-  const GRID_STEP_X = 50;   // world units between vertical lines
-  const GRID_STEP_Y = 25;   // world units between horizontal lines
+  const GRID_STEP_X = 10;   // world units between vertical lines
+  const GRID_STEP_Y = 5;    // world units between horizontal lines
 
   function drawGrid() {
     ctx.save();
+
+    const drawW = canvas.width  - PAD_L - PAD_R;
+    const drawH = canvas.height - PAD_T - PAD_B;
 
     /* Minor grid */
     ctx.strokeStyle = GRID_COLOR;
@@ -85,34 +95,35 @@
     for (let wx = 0; wx <= WORLD_W; wx += GRID_STEP_X) {
       const cx = toCanvas(wx, 0).x;
       ctx.beginPath();
-      ctx.moveTo(cx, 0);
-      ctx.lineTo(cx, canvas.height);
+      ctx.moveTo(cx, PAD_T);
+      ctx.lineTo(cx, PAD_T + drawH);
       ctx.stroke();
     }
 
     for (let wy = 0; wy <= WORLD_H; wy += GRID_STEP_Y) {
       const cy = toCanvas(0, wy).y;
       ctx.beginPath();
-      ctx.moveTo(0, cy);
-      ctx.lineTo(canvas.width, cy);
+      ctx.moveTo(PAD_L, cy);
+      ctx.lineTo(PAD_L + drawW, cy);
       ctx.stroke();
     }
 
     /* Axis labels */
-    ctx.fillStyle  = AXIS_COLOR;
-    ctx.font       = `10px 'Segoe UI', sans-serif`;
-    ctx.textAlign  = 'center';
+    ctx.fillStyle    = AXIS_COLOR;
+    ctx.font         = `10px 'Segoe UI', sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'top';
 
     for (let wx = 0; wx <= WORLD_W; wx += GRID_STEP_X) {
       const cx = toCanvas(wx, 0).x;
-      ctx.fillText(wx, cx, canvas.height - 3);
+      ctx.fillText(wx, cx, PAD_T + drawH + 3);
     }
 
     ctx.textAlign    = 'right';
     ctx.textBaseline = 'middle';
     for (let wy = 0; wy <= WORLD_H; wy += GRID_STEP_Y) {
       const cy = toCanvas(0, wy).y;
-      ctx.fillText(wy, 24, cy);
+      ctx.fillText(wy, PAD_L - 4, cy);
     }
 
     ctx.restore();
