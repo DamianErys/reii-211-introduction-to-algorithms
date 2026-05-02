@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BFS – Node Plane</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    /* ── Page layout ─────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      gap: 0;
+      align-items: flex-start;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* ── Left control panel ──────────────────────────────────────────── */
+    .controls {
+      width: 220px;
+      min-width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Canvas wrapper ──────────────────────────────────────────────── */
+    #plane-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 12px 0 12px;
+    }
+
+    #plane {
+      display: block;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      cursor: crosshair;
+    }
+
+    .canvas-info {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── Right info panel ────────────────────────────────────────────── */
+    .right-panel {
+      width: 200px;
+      min-width: 200px;
+      flex-shrink: 0;
+      padding: 12px 12px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #475569;
+      min-height: 36px;
+    }
+
+    .info-box strong {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    /* ── Matrix display ──────────────────────────────────────────────── */
+    #matrix-box {
+      flex: 1;
+      overflow: auto;
+    }
+
+    #matrix-table {
+      border-collapse: collapse;
+      font-size: 10px;
+      font-family: 'Courier New', monospace;
+      width: 100%;
+    }
+
+    #matrix-table th,
+    #matrix-table td {
+      border: 1px solid #e2e8f0;
+      padding: 3px 5px;
+      text-align: center;
+      min-width: 22px;
+    }
+
+    #matrix-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    #matrix-table td {
+      color: #1e293b;
+    }
+
+    #matrix-table td.zero {
+      color: #cbd5e1;
+    }
+
+    /* ── Form inputs ─────────────────────────────────────────────────── */
+    .input-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .input-row input[type="text"] {
+      flex: 1;
+      padding: 4px 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #fff;
+      color: #1e293b;
+      outline: none;
+      min-width: 0;
+    }
+
+    .input-row input[type="text"]:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+    }
+
+    .input-row input[type="number"] {
+      width: 52px;
+      padding: 4px 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #fff;
+      color: #1e293b;
+      outline: none;
+    }
+
+    .input-row input[type="number"]:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+    }
+
+    .input-row label {
+      font-size: 11px;
+      color: #64748b;
+      white-space: nowrap;
+      min-width: 12px;
+    }
+
+    select {
+      flex: 1;
+      padding: 4px 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #fff;
+      color: #1e293b;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: #6366f1;
+    }
+
+    /* ── Node list ───────────────────────────────────────────────────── */
+    #node-list {
+      list-style: none;
+      margin: 4px 0 0;
+      padding: 0;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+
+    #node-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 4px;
+      border-radius: 3px;
+      color: #334155;
+    }
+
+    #node-list li:hover {
+      background: #f1f5f9;
+    }
+
+    #node-list li .del-btn {
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    #node-list li .del-btn:hover {
+      color: #ef4444;
+    }
+
+    /* ── Edge list ───────────────────────────────────────────────────── */
+    #edge-list {
+      list-style: none;
+      margin: 4px 0 0;
+      padding: 0;
+      max-height: 100px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+
+    #edge-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3px 4px;
+      border-radius: 3px;
+      color: #334155;
+    }
+
+    #edge-list li:hover {
+      background: #f1f5f9;
+    }
+
+    #edge-list li .del-btn {
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0 2px;
+      line-height: 1;
+    }
+
+    /* ── Error / hint text ───────────────────────────────────────────── */
+    .hint {
+      font-size: 10px;
+      color: #ef4444;
+      margin-top: 2px;
+      min-height: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>BFS – Node Plane</h2>
+
+  <div class="layout">
+
+    <!-- ── Left Controls ──────────────────────────────────────────────── -->
+    <div class="controls">
+
+      <!-- Add Node -->
+      <div class="control-group">
+        <h3>Add Node</h3>
+
+        <div class="input-row">
+          <label>Name</label>
+          <input type="text" id="node-name" placeholder="e.g. A" maxlength="4" />
+        </div>
+
+        <div class="input-row">
+          <label>X</label>
+          <input type="number" id="node-x" placeholder="0–500" min="0" max="500" />
+        </div>
+
+        <div class="input-row">
+          <label>Y</label>
+          <input type="number" id="node-y" placeholder="0–250" min="0" max="250" />
+        </div>
+
+        <div class="hint" id="node-hint"></div>
+        <button id="add-node-btn">+ Add Node</button>
+
+        <ul id="node-list"></ul>
+      </div>
+
+      <!-- Add Edge -->
+      <div class="control-group">
+        <h3>Add Edge</h3>
+
+        <div class="input-row">
+          <label>From</label>
+          <select id="edge-from"><option value="">–</option></select>
+        </div>
+
+        <div class="input-row">
+          <label>To</label>
+          <select id="edge-to"><option value="">–</option></select>
+        </div>
+
+        <div class="input-row">
+          <label>W</label>
+          <input type="number" id="edge-weight" placeholder="1" min="0" value="1" />
+        </div>
+
+        <div class="hint" id="edge-hint"></div>
+        <button id="add-edge-btn">+ Add Edge</button>
+
+        <ul id="edge-list"></ul>
+      </div>
+
+      <!-- Actions -->
+      <div class="control-group">
+        <h3>Actions</h3>
+        <button id="clear-btn">Clear All</button>
+      </div>
+
+    </div>
+
+    <!-- ── Canvas ─────────────────────────────────────────────────────── -->
+    <div id="plane-wrapper">
+      <canvas id="plane"></canvas>
+      <div class="canvas-info">
+        Grid range: X 0–500 &nbsp;|&nbsp; Y 0–250
+      </div>
+    </div>
+
+    <!-- ── Right Info Panel ───────────────────────────────────────────── -->
+    <div class="right-panel">
+      <div class="info-box">
+        <strong>Graph Info</strong>
+        <span id="info-nodes">Nodes: 0</span><br />
+        <span id="info-edges">Edges: 0</span>
+      </div>
+
+      <div class="info-box" id="matrix-box">
+        <strong>Adjacency Matrix</strong>
+        <div id="matrix-container">
+          <span style="color:#cbd5e1;font-size:11px;">No nodes yet</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PlaneScript is the shared graph state / drawing engine -->
+  <script src="../PlaneScript.js"></script>
+  <!-- BFS-specific logic (empty for now) -->
+  <script src="BFS.js"></script>
+
+</body>
+</html>
