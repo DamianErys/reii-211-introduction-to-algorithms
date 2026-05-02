@@ -26,95 +26,151 @@
       gap: 0;
     }
 
-    /* ── Canvas wrapper ──────────────────────────────────────────────── */
-    #plane-wrapper {
+    /* ── Main view area ──────────────────────────────────────────────── */
+    #view-area {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
+      min-width: 0;
+      padding: 12px;
+      box-sizing: border-box;
     }
 
+    /* ── Canvas ──────────────────────────────────────────────────────── */
     #plane {
       display: block;
       border: 1.5px solid #cbd5e1;
       border-radius: 6px;
       background: #fff;
-      cursor: crosshair;
     }
 
-    .canvas-info {
-      margin-top: 8px;
-      font-size: 11px;
-      color: #94a3b8;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    /* ── Right info panel ────────────────────────────────────────────── */
-    .right-panel {
-      width: 200px;
-      min-width: 200px;
-      flex-shrink: 0;
-      padding: 12px 12px 0 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .info-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-size: 12px;
-      color: #475569;
-      min-height: 36px;
-    }
-
-    .info-box strong {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #94a3b8;
-      margin-bottom: 6px;
-    }
-
-    /* ── Matrix display ──────────────────────────────────────────────── */
-    #matrix-box {
-      flex: 1;
-      overflow: auto;
-    }
-
-    #matrix-table {
-      border-collapse: collapse;
-      font-size: 10px;
-      font-family: 'Courier New', monospace;
+    /* ── Matrix view ─────────────────────────────────────────────────── */
+    #matrix-view {
+      display: none;
       width: 100%;
+      overflow: auto;
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 16px;
+      box-sizing: border-box;
     }
 
-    #matrix-table th,
-    #matrix-table td {
+    #matrix-view.active { display: block; }
+
+    #mat-table {
+      border-collapse: collapse;
+      font-size: 12px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    #mat-table th,
+    #mat-table td {
       border: 1px solid #e2e8f0;
-      padding: 3px 5px;
+      padding: 0;
       text-align: center;
-      min-width: 22px;
+      min-width: 52px;
+      height: 34px;
     }
 
-    #matrix-table th {
+    #mat-table .corner {
+      background: #f8fafc;
+      min-width: 36px;
+    }
+
+    /* Column headers — node names shown above weight grid */
+    #mat-table .col-header {
       background: #f1f5f9;
+      font-size: 11px;
       font-weight: 600;
       color: #475569;
+      padding: 0 4px;
     }
 
-    #matrix-table td {
+    /* Row-header label cells (Name / X / Y) */
+    #mat-table .row-label {
+      background: #f1f5f9;
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      padding: 0 8px;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    /* Every editable cell uses a full-size input */
+    #mat-table input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      text-align: center;
+      font-size: 12px;
+      font-family: inherit;
       color: #1e293b;
+      padding: 0;
+      box-sizing: border-box;
+      display: block;
     }
 
-    #matrix-table td.zero {
+    #mat-table input:focus { background: #eff6ff; }
+
+    /* Diagonal — locked, read-only */
+    #mat-table td.diag {
+      background: #f1f5f9;
       color: #cbd5e1;
+      font-weight: 700;
+      font-size: 13px;
     }
+
+    /* Lower triangle — mirrored display */
+    #mat-table td.mirror {
+      background: #fafafa;
+    }
+
+    #mat-table td.mirror input {
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    /* Zero weight fades out */
+    #mat-table td.zero-w input { color: #d1d5db; }
+
+    /* ── Toggle switch ───────────────────────────────────────────────── */
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #64748b;
+      user-select: none;
+    }
+
+    .toggle-track {
+      width: 40px;
+      height: 20px;
+      background: #cbd5e1;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toggle-track.on { background: #6366f1; }
+
+    .toggle-thumb {
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: left 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .toggle-track.on .toggle-thumb { left: 22px; }
 
     /* ── Form inputs ─────────────────────────────────────────────────── */
     .input-row {
@@ -161,7 +217,7 @@
       font-size: 11px;
       color: #64748b;
       white-space: nowrap;
-      min-width: 12px;
+      min-width: 28px;
     }
 
     select {
@@ -175,87 +231,24 @@
       outline: none;
     }
 
-    select:focus {
-      border-color: #6366f1;
-    }
+    select:focus { border-color: #6366f1; }
 
-    /* ── Node list ───────────────────────────────────────────────────── */
-    #node-list {
-      list-style: none;
-      margin: 4px 0 0;
-      padding: 0;
-      max-height: 120px;
-      overflow-y: auto;
-      font-size: 11px;
-    }
-
-    #node-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 3px 4px;
-      border-radius: 3px;
-      color: #334155;
-    }
-
-    #node-list li:hover {
-      background: #f1f5f9;
-    }
-
-    #node-list li .del-btn {
-      background: none;
-      border: none;
-      color: #f87171;
-      cursor: pointer;
-      font-size: 13px;
-      padding: 0 2px;
-      line-height: 1;
-    }
-
-    #node-list li .del-btn:hover {
-      color: #ef4444;
-    }
-
-    /* ── Edge list ───────────────────────────────────────────────────── */
-    #edge-list {
-      list-style: none;
-      margin: 4px 0 0;
-      padding: 0;
-      max-height: 100px;
-      overflow-y: auto;
-      font-size: 11px;
-    }
-
-    #edge-list li {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 3px 4px;
-      border-radius: 3px;
-      color: #334155;
-    }
-
-    #edge-list li:hover {
-      background: #f1f5f9;
-    }
-
-    #edge-list li .del-btn {
-      background: none;
-      border: none;
-      color: #f87171;
-      cursor: pointer;
-      font-size: 13px;
-      padding: 0 2px;
-      line-height: 1;
-    }
-
-    /* ── Error / hint text ───────────────────────────────────────────── */
     .hint {
       font-size: 10px;
       color: #ef4444;
       margin-top: 2px;
       min-height: 14px;
     }
+
+    .info-line {
+      font-size: 11px;
+      color: #64748b;
+      margin: 2px 0;
+    }
+
+    /* Panels hidden when in matrix mode */
+    .plot-only { }
+    .plot-only.hidden { display: none; }
   </style>
 </head>
 
@@ -265,57 +258,84 @@
 
   <div class="layout">
 
-    <!-- ── Left Controls ──────────────────────────────────────────────── -->
+    <!-- ══════════════════════════════════════════════════════════
+         LEFT CONTROLS
+         ══════════════════════════════════════════════════════════ -->
     <div class="controls">
 
-      <!-- Add Node -->
+      <!-- View toggle -->
       <div class="control-group">
-        <h3>Add Node</h3>
+        <h3>View</h3>
+        <div class="view-toggle">
+          <span id="lbl-plot" style="font-weight:600;color:#6366f1;">Plot</span>
+          <div class="toggle-track" id="view-toggle">
+            <div class="toggle-thumb"></div>
+          </div>
+          <span id="lbl-matrix">Matrix</span>
+        </div>
+      </div>
 
+      <!-- Graph info -->
+      <div class="control-group">
+        <h3>Graph</h3>
+        <p class="info-line" id="info-nodes">Nodes: 0</p>
+        <p class="info-line" id="info-edges">Edges: 0</p>
+      </div>
+
+      <!-- Add Node -->
+      <div class="control-group plot-only" id="panel-add-node">
+        <h3>Add Node</h3>
         <div class="input-row">
           <label>Name</label>
           <input type="text" id="node-name" placeholder="e.g. A" maxlength="4" />
         </div>
-
         <div class="input-row">
           <label>X</label>
           <input type="number" id="node-x" placeholder="0–100" min="0" max="100" />
         </div>
-
         <div class="input-row">
           <label>Y</label>
           <input type="number" id="node-y" placeholder="0–50" min="0" max="50" />
         </div>
-
         <div class="hint" id="node-hint"></div>
         <button id="add-node-btn">+ Add Node</button>
+      </div>
 
-        <ul id="node-list"></ul>
+      <!-- Remove Node -->
+      <div class="control-group plot-only" id="panel-remove-node">
+        <h3>Remove Node</h3>
+        <div class="input-row">
+          <select id="remove-node-sel"><option value="">– select node –</option></select>
+        </div>
+        <button id="remove-node-btn">Remove</button>
       </div>
 
       <!-- Add Edge -->
-      <div class="control-group">
+      <div class="control-group plot-only" id="panel-add-edge">
         <h3>Add Edge</h3>
-
         <div class="input-row">
           <label>From</label>
           <select id="edge-from"><option value="">–</option></select>
         </div>
-
         <div class="input-row">
           <label>To</label>
           <select id="edge-to"><option value="">–</option></select>
         </div>
-
         <div class="input-row">
           <label>W</label>
           <input type="number" id="edge-weight" placeholder="1" min="0" value="1" />
         </div>
-
         <div class="hint" id="edge-hint"></div>
         <button id="add-edge-btn">+ Add Edge</button>
+      </div>
 
-        <ul id="edge-list"></ul>
+      <!-- Remove Edge -->
+      <div class="control-group plot-only" id="panel-remove-edge">
+        <h3>Remove Edge</h3>
+        <div class="input-row">
+          <select id="remove-edge-sel"><option value="">– select edge –</option></select>
+        </div>
+        <button id="remove-edge-btn">Remove</button>
       </div>
 
       <!-- Actions -->
@@ -326,32 +346,23 @@
 
     </div>
 
-    <!-- ── Canvas ─────────────────────────────────────────────────────── -->
-    <div id="plane-wrapper">
+    <!-- ══════════════════════════════════════════════════════════
+         MAIN VIEW
+         ══════════════════════════════════════════════════════════ -->
+    <div id="view-area">
       <canvas id="plane"></canvas>
-    </div>
-
-    <!-- ── Right Info Panel ───────────────────────────────────────────── -->
-    <div class="right-panel">
-      <div class="info-box">
-        <strong>Graph Info</strong>
-        <span id="info-nodes">Nodes: 0</span><br />
-        <span id="info-edges">Edges: 0</span>
-      </div>
-
-      <div class="info-box" id="matrix-box">
-        <strong>Adjacency Matrix</strong>
-        <div id="matrix-container">
-          <span style="color:#cbd5e1;font-size:11px;">No nodes yet</span>
+      <div id="matrix-view">
+        <div id="mat-container">
+          <span style="color:#cbd5e1;font-size:13px;">
+            No nodes yet — switch to Plot view and add some nodes first.
+          </span>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- PlaneScript is the shared graph state / drawing engine -->
   <script src="../PlaneScript.js"></script>
-  <!-- BFS-specific logic (empty for now) -->
   <script src="BFS.js"></script>
 
 </body>
