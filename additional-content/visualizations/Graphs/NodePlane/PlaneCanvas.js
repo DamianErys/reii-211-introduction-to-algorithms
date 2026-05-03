@@ -48,10 +48,14 @@
   /* ── Canvas sizing ───────────────────────────────────────────────────────── */
   function sizeCanvas() {
     const area = document.getElementById('view-area');
+    /* Anchor on viewport height so the canvas size is stable whether the
+       controls panel is wide (plot mode) or narrow (matrix mode).        */
+    const maxH = window.innerHeight * 0.82;
     const maxW = area.clientWidth - 24;
-    const maxH = window.innerHeight * 0.74;
-    let w = maxW, h = w / 2;
-    if (h > maxH) { h = maxH; w = h * 2; }
+    /* World is 2:1, so ideal height = half the available width */
+    let h = maxW / 2;
+    if (h > maxH) h = maxH;
+    const w = Math.min(h * 2, maxW);
     canvas.width  = Math.floor(w);
     canvas.height = Math.floor(h);
     redraw();

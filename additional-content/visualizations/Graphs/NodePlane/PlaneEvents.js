@@ -73,6 +73,44 @@
     setView(getViewMode() === 'plot' ? 'matrix' : 'plot');
   });
 
+  /* ── Node panel: Add / Remove sub-toggle ────────────────────────────────── */
+  (function () {
+    let removeMode = false;
+    const track      = document.getElementById('node-mode-toggle');
+    const addDiv     = document.getElementById('sub-add-node');
+    const removeDiv  = document.getElementById('sub-remove-node');
+    const lblAdd     = document.getElementById('lbl-add-node');
+    const lblRemove  = document.getElementById('lbl-remove-node');
+
+    track.addEventListener('click', () => {
+      removeMode = !removeMode;
+      track.classList.toggle('on', removeMode);
+      addDiv   .classList.toggle('sub-hidden', removeMode);
+      removeDiv.classList.toggle('sub-hidden', !removeMode);
+      lblAdd   .classList.toggle('active', !removeMode);
+      lblRemove.classList.toggle('active',  removeMode);
+    });
+  })();
+
+  /* ── Edge panel: Add / Remove sub-toggle ────────────────────────────────── */
+  (function () {
+    let removeMode = false;
+    const track      = document.getElementById('edge-mode-toggle');
+    const addDiv     = document.getElementById('sub-add-edge');
+    const removeDiv  = document.getElementById('sub-remove-edge');
+    const lblAdd     = document.getElementById('lbl-add-edge');
+    const lblRemove  = document.getElementById('lbl-remove-edge');
+
+    track.addEventListener('click', () => {
+      removeMode = !removeMode;
+      track.classList.toggle('on', removeMode);
+      addDiv   .classList.toggle('sub-hidden', removeMode);
+      removeDiv.classList.toggle('sub-hidden', !removeMode);
+      lblAdd   .classList.toggle('active', !removeMode);
+      lblRemove.classList.toggle('active',  removeMode);
+    });
+  })();
+
   /* ── Resize ──────────────────────────────────────────────────────────────── */
   window.addEventListener('resize', sizeCanvas);
 

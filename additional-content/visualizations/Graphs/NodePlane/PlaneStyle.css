@@ -240,3 +240,44 @@
     /* Panels hidden when in matrix mode */
     .plot-only { }
     .plot-only.hidden { display: none; }
+
+    /* ── Sub-toggle header (Node / Edge panels) ─────────────────────────────── */
+.sub-toggle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sub-toggle-header h3 {
+  margin: 0;
+}
+
+.sub-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.sub-lbl {
+  color: #94a3b8;
+  font-weight: 400;
+  transition: color 0.15s, font-weight 0.15s;
+}
+
+.sub-lbl.active {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.sub-toggle-track {
+  /* Inherits toggle-track sizing — just needs a smaller scale */
+  transform: scale(0.82);
+  transform-origin: center;
+}
+
+/* Hidden sub-panel */
+.sub-hidden {
+  display: none;
+}

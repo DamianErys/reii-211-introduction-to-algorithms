@@ -38,60 +38,84 @@
         <p class="info-line" id="info-edges">Edges: 0</p>
       </div>
 
-      <!-- Add Node -->
-      <div class="control-group plot-only" id="panel-add-node">
-        <h3>Add Node</h3>
-        <div class="input-row">
-          <label>Name</label>
-          <input type="text" id="node-name" placeholder="e.g. A" maxlength="4" />
+      <!-- ── Node panel (Add / Remove sub-toggle) ── -->
+      <div class="control-group plot-only" id="panel-node">
+        <div class="sub-toggle-header">
+          <h3>Node</h3>
+          <div class="sub-toggle">
+            <span id="lbl-add-node"  class="sub-lbl active">Add</span>
+            <div class="toggle-track sub-toggle-track" id="node-mode-toggle">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span id="lbl-remove-node" class="sub-lbl">Remove</span>
+          </div>
         </div>
-        <div class="input-row">
-          <label>X</label>
-          <input type="number" id="node-x" placeholder="0–100" min="0" max="100" />
+
+        <!-- Add Node fields -->
+        <div id="sub-add-node">
+          <div class="input-row">
+            <label>Name</label>
+            <input type="text" id="node-name" placeholder="e.g. A" maxlength="4" />
+          </div>
+          <div class="input-row">
+            <label>X</label>
+            <input type="number" id="node-x" placeholder="0–100" min="0" max="100" />
+          </div>
+          <div class="input-row">
+            <label>Y</label>
+            <input type="number" id="node-y" placeholder="0–50" min="0" max="50" />
+          </div>
+          <div class="hint" id="node-hint"></div>
+          <button id="add-node-btn">+ Add Node</button>
         </div>
-        <div class="input-row">
-          <label>Y</label>
-          <input type="number" id="node-y" placeholder="0–50" min="0" max="50" />
+
+        <!-- Remove Node fields -->
+        <div id="sub-remove-node" class="sub-hidden">
+          <div class="input-row">
+            <select id="remove-node-sel"><option value="">– select node –</option></select>
+          </div>
+          <button id="remove-node-btn">Remove Node</button>
         </div>
-        <div class="hint" id="node-hint"></div>
-        <button id="add-node-btn">+ Add Node</button>
       </div>
 
-      <!-- Remove Node -->
-      <div class="control-group plot-only" id="panel-remove-node">
-        <h3>Remove Node</h3>
-        <div class="input-row">
-          <select id="remove-node-sel"><option value="">– select node –</option></select>
+      <!-- ── Edge panel (Add / Remove sub-toggle) ── -->
+      <div class="control-group plot-only" id="panel-edge">
+        <div class="sub-toggle-header">
+          <h3>Edge</h3>
+          <div class="sub-toggle">
+            <span id="lbl-add-edge"    class="sub-lbl active">Add</span>
+            <div class="toggle-track sub-toggle-track" id="edge-mode-toggle">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span id="lbl-remove-edge" class="sub-lbl">Remove</span>
+          </div>
         </div>
-        <button id="remove-node-btn">Remove</button>
-      </div>
 
-      <!-- Add Edge -->
-      <div class="control-group plot-only" id="panel-add-edge">
-        <h3>Add Edge</h3>
-        <div class="input-row">
-          <label>From</label>
-          <select id="edge-from"><option value="">–</option></select>
+        <!-- Add Edge fields -->
+        <div id="sub-add-edge">
+          <div class="input-row">
+            <label>From</label>
+            <select id="edge-from"><option value="">–</option></select>
+          </div>
+          <div class="input-row">
+            <label>To</label>
+            <select id="edge-to"><option value="">–</option></select>
+          </div>
+          <div class="input-row">
+            <label>W</label>
+            <input type="number" id="edge-weight" placeholder="1" min="0" value="1" />
+          </div>
+          <div class="hint" id="edge-hint"></div>
+          <button id="add-edge-btn">+ Add Edge</button>
         </div>
-        <div class="input-row">
-          <label>To</label>
-          <select id="edge-to"><option value="">–</option></select>
-        </div>
-        <div class="input-row">
-          <label>W</label>
-          <input type="number" id="edge-weight" placeholder="1" min="0" value="1" />
-        </div>
-        <div class="hint" id="edge-hint"></div>
-        <button id="add-edge-btn">+ Add Edge</button>
-      </div>
 
-      <!-- Remove Edge -->
-      <div class="control-group plot-only" id="panel-remove-edge">
-        <h3>Remove Edge</h3>
-        <div class="input-row">
-          <select id="remove-edge-sel"><option value="">– select edge –</option></select>
+        <!-- Remove Edge fields -->
+        <div id="sub-remove-edge" class="sub-hidden">
+          <div class="input-row">
+            <select id="remove-edge-sel"><option value="">– select edge –</option></select>
+          </div>
+          <button id="remove-edge-btn">Remove Edge</button>
         </div>
-        <button id="remove-edge-btn">Remove</button>
       </div>
 
       <!-- Actions -->
