@@ -111,6 +111,37 @@
     });
   })();
 
+  /* ── Canvas click → fill X / Y inputs ───────────────────────────────────── */
+  window.Plane.canvas.canvas.addEventListener('click', (e) => {
+    /* Only active in plot mode and when the Add Node sub-panel is visible */
+    const addDiv = document.getElementById('sub-add-node');
+    if (!addDiv || addDiv.classList.contains('sub-hidden')) return;
+
+    const { canvas, WORLD_W, WORLD_H } = window.Plane.canvas;
+    const PAD_L = 28, PAD_R = 10, PAD_T = 10, PAD_B = 18;
+
+    const rect = canvas.getBoundingClientRect();
+    const px   = e.clientX - rect.left;
+    const py   = e.clientY - rect.top;
+
+    /* Pixel → world (Y axis flipped) */
+    const dW = canvas.width  - PAD_L - PAD_R;
+    const dH = canvas.height - PAD_T - PAD_B;
+    const wx = Math.round(((px - PAD_L) / dW) * WORLD_W);
+    const wy = Math.round((1 - (py - PAD_T) / dH) * WORLD_H);
+
+    /* Clamp to world bounds */
+    const x = Math.max(0, Math.min(WORLD_W, wx));
+    const y = Math.max(0, Math.min(WORLD_H, wy));
+
+    document.getElementById('node-x').value = x;
+    document.getElementById('node-y').value = y;
+
+    /* Focus the name field so the user can type and hit Enter */
+    const nameInput = document.getElementById('node-name');
+    if (!nameInput.value) nameInput.focus();
+  });
+
   /* ── Resize ──────────────────────────────────────────────────────────────── */
   window.addEventListener('resize', sizeCanvas);
 
