@@ -281,3 +281,223 @@
 .sub-hidden {
   display: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PlaneMatrix.css  –  Styles for the adjacency-matrix view
+   Append to (or @import from) PlaneStyle.css.
+   Replaces all previous #mat-table / .mirror / .diag / .zero-w rules.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Scroll wrapper ──────────────────────────────────────────────────────── */
+.mat-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 78vh;
+  padding-bottom: 8px;
+}
+
+/* ── Table base ──────────────────────────────────────────────────────────── */
+.mat-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+  white-space: nowrap;
+}
+
+/* ── Column headers (x, y, node, A, B, C …) ─────────────────────────────── */
+.mat-table .mat-hdr {
+  padding: 5px 10px;
+  font-weight: 600;
+  color: #64748b;
+  border-bottom: 2px solid #e2e8f0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+.mat-table .mat-coord { color: #94a3b8; font-weight: 400; }
+.mat-table .mat-node-hdr { color: #475569; }
+.mat-table .mat-col-hdr {
+  color: #6366f1;
+  font-weight: 700;
+  min-width: 52px;
+}
+
+/* ── All cells common ────────────────────────────────────────────────────── */
+.mat-table td {
+  padding: 2px 4px;
+  border: none;
+}
+
+/* Row hover highlight */
+.mat-table tbody tr:hover td {
+  background: #f8faff;
+}
+
+/* ── Coordinate cells (x, y) ─────────────────────────────────────────────── */
+.mat-table .mat-coord-cell input {
+  width: 46px;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ── Node name cell ──────────────────────────────────────────────────────── */
+.mat-table .mat-name-cell {
+  padding-left: 8px;
+  padding-right: 12px;
+  border-right: 2px solid #e2e8f0;
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.mat-table .mat-name-cell input {
+  font-weight: 700;
+  color: #1e293b;
+  width: 48px;
+}
+
+/* ── Weight cells ────────────────────────────────────────────────────────── */
+.mat-table .mat-weight {
+  text-align: center;
+}
+
+.mat-table .mat-weight input {
+  width: 44px;
+  text-align: center;
+}
+
+/* Lower triangle — editable, normal text */
+.mat-table .mat-lower input {
+  color: #1e293b;
+}
+
+/* Upper triangle — read-only mirror, muted */
+.mat-table .mat-upper {
+  background: #f8fafc;
+}
+
+.mat-table .mat-upper input {
+  color: #94a3b8;
+  background: transparent;
+  cursor: default;
+}
+
+/* Zero weights — very faint, not distracting */
+.mat-table .mat-zero input {
+  color: #cbd5e1;
+}
+
+/* Diagonal — node@node = 0, distinct background */
+.mat-table .mat-diag {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  user-select: none;
+  min-width: 44px;
+}
+
+/* ── Shared input reset for all matrix inputs ────────────────────────────── */
+.mat-table input[type="text"],
+.mat-table input[type="number"] {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 4px 2px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: 13px;
+  transition: background 0.1s, outline 0.1s;
+}
+
+.mat-table input:focus {
+  background: #eff6ff;
+  outline: 2px solid #6366f1 !important;
+  outline-offset: -1px;
+}
+
+.mat-table input[readonly]:focus {
+  background: transparent;
+  outline: none !important;
+}
+
+/* ── Add-new row ─────────────────────────────────────────────────────────── */
+.mat-add-row td {
+  border-top: 1px dashed #cbd5e1;
+  padding: 6px 4px;
+}
+
+.mat-add-cell {
+  text-align: left;
+  padding-left: 12px !important;
+}
+
+.mat-add-input {
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  font-size: 13px;
+  color: #94a3b8;
+  font-style: italic;
+  width: 120px;
+  padding: 2px 4px !important;
+}
+
+.mat-add-input:focus {
+  color: #475569;
+  font-style: normal;
+  background: #f8fafc !important;
+  border-radius: 3px;
+}
+
+.mat-add-input::placeholder { color: #cbd5e1; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.mat-empty {
+  padding: 32px 24px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.mat-empty p {
+  margin: 0 0 12px;
+}
+
+.mat-empty-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mat-empty-add input {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  width: 100px;
+  outline: none;
+}
+
+.mat-empty-add input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+.mat-empty-add button {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #6366f1;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mat-empty-add button:hover { background: #4f46e5; }
