@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BFS – Node Plane</title>
+  <link rel="stylesheet" href="../../../style.css" />
+  <link rel="stylesheet" href="../PlaneStyle.css" />
+</head>
+<body>
+
+  <h2>BFS – Node Plane</h2>
+
+  <div class="layout">
+
+    <!-- ══════════════════════════════════════════════════════════
+         LEFT CONTROLS
+         ══════════════════════════════════════════════════════════ -->
+    <div class="controls">
+
+      <!-- View toggle -->
+      <div class="control-group">
+        <h3>View</h3>
+        <div class="view-toggle">
+          <span id="lbl-plot" style="font-weight:600;color:#6366f1;">Plot</span>
+          <div class="toggle-track" id="view-toggle">
+            <div class="toggle-thumb"></div>
+          </div>
+          <span id="lbl-matrix">Matrix</span>
+        </div>
+      </div>
+
+      <!-- Graph info -->
+      <div class="control-group">
+        <h3>Graph</h3>
+        <p class="info-line" id="info-nodes">Nodes: 0</p>
+        <p class="info-line" id="info-edges">Edges: 0</p>
+      </div>
+
+      <!-- ── Node panel (Add / Remove sub-toggle) ── -->
+      <div class="control-group plot-only" id="panel-node">
+        <div class="sub-toggle-header">
+          <h3>Node</h3>
+          <div class="sub-toggle">
+            <span id="lbl-add-node"  class="sub-lbl active">Add</span>
+            <div class="toggle-track sub-toggle-track" id="node-mode-toggle">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span id="lbl-remove-node" class="sub-lbl">Remove</span>
+          </div>
+        </div>
+
+        <!-- Add Node fields -->
+        <div id="sub-add-node">
+          <div class="input-row">
+            <label>Name</label>
+            <input type="text" id="node-name" placeholder="e.g. A" maxlength="4" />
+          </div>
+          <div class="input-row">
+            <label>X</label>
+            <input type="number" id="node-x" placeholder="0–100" min="0" max="100" />
+          </div>
+          <div class="input-row">
+            <label>Y</label>
+            <input type="number" id="node-y" placeholder="0–50" min="0" max="50" />
+          </div>
+          <div class="hint" id="node-hint"></div>
+          <button id="add-node-btn">+ Add Node</button>
+        </div>
+
+        <!-- Remove Node fields -->
+        <div id="sub-remove-node" class="sub-hidden">
+          <div class="input-row">
+            <select id="remove-node-sel"><option value="">– select node –</option></select>
+          </div>
+          <button id="remove-node-btn">Remove Node</button>
+        </div>
+      </div>
+
+      <!-- ── Edge panel (Add / Remove sub-toggle) ── -->
+      <div class="control-group plot-only" id="panel-edge">
+        <div class="sub-toggle-header">
+          <h3>Edge</h3>
+          <div class="sub-toggle">
+            <span id="lbl-add-edge"    class="sub-lbl active">Add</span>
+            <div class="toggle-track sub-toggle-track" id="edge-mode-toggle">
+              <div class="toggle-thumb"></div>
+            </div>
+            <span id="lbl-remove-edge" class="sub-lbl">Remove</span>
+          </div>
+        </div>
+
+        <!-- Add Edge fields -->
+        <div id="sub-add-edge">
+          <div class="input-row">
+            <label>From</label>
+            <select id="edge-from"><option value="">–</option></select>
+          </div>
+          <div class="input-row">
+            <label>To</label>
+            <select id="edge-to"><option value="">–</option></select>
+          </div>
+          <div class="input-row">
+            <label>W</label>
+            <input type="number" id="edge-weight" placeholder="1" min="0" value="1" />
+          </div>
+          <div class="hint" id="edge-hint"></div>
+          <button id="add-edge-btn">+ Add Edge</button>
+        </div>
+
+        <!-- Remove Edge fields -->
+        <div id="sub-remove-edge" class="sub-hidden">
+          <div class="input-row">
+            <select id="remove-edge-sel"><option value="">– select edge –</option></select>
+          </div>
+          <button id="remove-edge-btn">Remove Edge</button>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="control-group">
+        <h3>Actions</h3>
+        <button id="clear-btn">Clear All</button>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         MAIN VIEW
+         ══════════════════════════════════════════════════════════ -->
+    <div id="view-area">
+      <canvas id="plane"></canvas>
+      <div id="matrix-view">
+        <div id="mat-container">
+          <span style="color:#cbd5e1;font-size:13px;">
+            No nodes yet — switch to Plot view and add some nodes first.
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../PlaneScript.js"></script>
+  <script src="BFS.js"></script>
+
+</body>
+</html>
