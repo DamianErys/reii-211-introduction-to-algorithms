@@ -53,9 +53,9 @@ const UIControls = (function () {
                     </label>
                     
                     <div class="control-group" id="speedControl" style="margin-top: 8px;">
-                        <label>Animation Speed: <span class="range-val" id="val-speed">Normal</span></label>
+                        <label>Animation Speed: <span class="range-val" id="val-speed">55x</span></label>
                         <input type="range" id="slider-speed" min="0" max="100" value="50" />
-                        <small style="display:block; margin-top:4px; color:#666;">Faster ← → Slower</small>
+                        <small style="display:block; margin-top:4px; color:#666;">Slower ← → Faster</small>
                     </div>
                     
                     <div id="stepControls">
@@ -97,32 +97,22 @@ const UIControls = (function () {
             getNumCols: () => parseInt(document.getElementById("gridCols")?.value || numCols, 10),
             getAlgorithm: () => document.querySelector("input[name='algorithm']:checked")?.value,
             getSpeedDelay: () => {
-                const speed = parseInt(document.getElementById("slider-speed")?.value || 50, 10);
+                const slider = document.getElementById("slider-speed");
                 const speedVal = document.getElementById("val-speed");
-                
-                // Speed label mapping - INVERTED: higher slider value = faster animation
-                let speedText = "Normal";
-                let delay;
-                
-                if (speed <= 10) {
-                    speedText = "Very Fast";
-                    delay = 10;
-                } else if (speed <= 30) {
-                    speedText = "Fast";
-                    delay = 50;
-                } else if (speed <= 70) {
-                    speedText = "Normal";
-                    delay = 150;
-                } else if (speed <= 90) {
-                    speedText = "Slow";
-                    delay = 350;
-                } else {
-                    speedText = "Very Slow";
-                    delay = 500;
+                const speed = parseInt(slider?.value || 50, 10);
+
+                // Map 0-100 slider to 10-100 speed multiplier
+                const multiplier = 10 + (speed * 0.9);
+
+                // Calculate delay: higher multiplier = lower delay
+                // Assuming 5000ms is the 'slowest' base unit, 
+                // 10x speed = 500ms delay, 100x speed = 50ms delay.
+                const delay = Math.round(500 / multiplier);
+
+                if (speedVal) {
+                    speedVal.textContent = `${multiplier.toFixed(0)}x`;
                 }
-                
-                if (speedVal) speedVal.textContent = speedText;
-                
+
                 return delay;
             },
             isStepMode: () => document.getElementById("visualiseCheck")?.checked || false,
