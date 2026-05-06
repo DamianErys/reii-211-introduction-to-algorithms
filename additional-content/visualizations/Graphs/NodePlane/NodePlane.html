@@ -18,7 +18,6 @@
     <!-- ══════════════════════════════════════════════════════════
          LEFT CONTROLS
          ══════════════════════════════════════════════════════════ -->
-    <!-- LEFT CONTROLS -->
     <div class="controls" style="width: 340px; min-width: 340px;">
 
       <!-- Algorithm selector -->
@@ -28,9 +27,9 @@
           <select id="algo-select" style="width:100%;">
             <option value="bfs">Breadth-First Search (BFS)</option>
             <option value="dfs">Depth-First Search (DFS)</option>
-            <option value="prim"    disabled>Prim's MST (coming soon)</option>
-            <option value="dijkstra" disabled>Dijkstra (coming soon)</option>
-            <option value="kruskal" disabled>Kruskal's MST (coming soon)</option>
+            <option value="prim">Prim's MST</option>
+            <option value="dijkstra">Dijkstra</option>
+            <option value="kruskal">Kruskal's MST</option>
           </select>
         </div>
       </div>
@@ -176,10 +175,14 @@
   <script src="ApplyAlgorithm.js"></script>
   <script src="Algorithms/BFS.js"></script>
   <script src="Algorithms/DFS.js"></script>
+  <script src="Algorithms/Prim.js"></script>
+  <script src="Algorithms/Dijkstra.js"></script>
+  <script src="Algorithms/Kruskal.js"></script>
   <script>
     /* ── Algorithm panel switcher ─────────────────────────────────────────── */
     (function () {
-      const ALGOS = ['bfs', 'dfs'];
+      const ALGOS = ['bfs', 'dfs', 'prim', 'dijkstra', 'kruskal'];
+      const sel   = document.getElementById('algo-select');
 
       function switchAlgo(selected) {
         for (const prefix of ALGOS) {
@@ -188,18 +191,18 @@
         }
       }
 
-      /* Panels are injected by AlgoShell after PlaneGraph is ready (~50 ms).
-         Poll until both exist, then wire up the dropdown. */
-      function tryWire() {
-        const allReady = ALGOS.every(p => document.getElementById(p + '-panel'));
-        if (!allReady) { setTimeout(tryWire, 100); return; }
+      /* Use a MutationObserver to catch each panel the moment AlgoShell
+         injects it, and immediately hide it if it isn't the active algo.
+         This prevents any panel from being visible before switchAlgo runs. */
+      const observer = new MutationObserver(() => {
+        switchAlgo(sel.value);
+      });
+      observer.observe(document.querySelector('.controls'), {
+        childList: true,
+        subtree: false,
+      });
 
-        const sel = document.getElementById('algo-select');
-        switchAlgo(sel.value);           /* apply initial selection */
-        sel.addEventListener('change', () => switchAlgo(sel.value));
-      }
-
-      tryWire();
+      sel.addEventListener('change', () => switchAlgo(sel.value));
     })();
   </script>
 
