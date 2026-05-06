@@ -1,269 +1,119 @@
-    /* ── Page layout ─────────────────────────────────────────────────── */
-    .layout {
-      display: flex;
-      gap: 0;
-      align-items: flex-start;
-      width: 100%;
-      box-sizing: border-box;
-    }
+/* ── Page layout ─────────────────────────────────────────────────── */
+.layout {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-    /* ── Left control panel ──────────────────────────────────────────── */
-    .controls {
-      width: 220px;
-      min-width: 220px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
+/* ── Left control panel (wider) ─────────────────────────────────── */
+.controls {
+  width: 280px;
+  min-width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
 
-    /* ── Main view area ──────────────────────────────────────────────── */
-    #view-area {
-      flex: 1;
-      min-width: 0;
-      padding: 12px;
-      box-sizing: border-box;
-    }
+/* ── Main view area ──────────────────────────────────────────────── */
+#view-area {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
 
-    /* ── Canvas ──────────────────────────────────────────────────────── */
-    #plane {
-      display: block;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 6px;
-      background: #fff;
-    }
+/* ── Canvas ──────────────────────────────────────────────────────── */
+#plane {
+  display: block;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+}
 
-    /* ── Matrix view ─────────────────────────────────────────────────── */
-    #matrix-view {
-      display: none;
-      width: 100%;
-      overflow: auto;
-      background: #fff;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 16px;
-      box-sizing: border-box;
-    }
+/* ── Matrix view ─────────────────────────────────────────────────── */
+#matrix-view {
+  display: none;
+  width: 100%;
+  overflow: auto;
+  background: #fff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 16px;
+  box-sizing: border-box;
+}
 
-    #matrix-view.active { display: block; }
+#matrix-view.active { display: block; }
 
-    #mat-table {
-      border-collapse: collapse;
-      font-size: 12px;
-      font-family: 'Segoe UI', sans-serif;
-    }
+/* ── Panel section toggle (Node/Edge tabs) ──────────────────────── */
+.panel-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
 
-    #mat-table th,
-    #mat-table td {
-      border: 1px solid #e2e8f0;
-      padding: 0;
-      text-align: center;
-      min-width: 52px;
-      height: 34px;
-    }
+.panel-tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
 
-    #mat-table .corner {
-      background: #f8fafc;
-      min-width: 36px;
-    }
+.panel-tab:hover {
+  color: #6366f1;
+}
 
-    /* Column headers — node names shown above weight grid */
-    #mat-table .col-header {
-      background: #f1f5f9;
-      font-size: 11px;
-      font-weight: 600;
-      color: #475569;
-      padding: 0 4px;
-    }
+.panel-tab.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
 
-    /* Row-header label cells (Name / X / Y) */
-    #mat-table .row-label {
-      background: #f1f5f9;
-      font-size: 11px;
-      font-weight: 600;
-      color: #475569;
-      padding: 0 8px;
-      white-space: nowrap;
-      text-align: right;
-    }
+/* ── Panel section content (shown/hidden via tabs) ──────────────── */
+.panel-section {
+  display: none;
+}
 
-    /* Every editable cell uses a full-size input */
-    #mat-table input {
-      width: 100%;
-      height: 100%;
-      border: none;
-      outline: none;
-      background: transparent;
-      text-align: center;
-      font-size: 12px;
-      font-family: inherit;
-      color: #1e293b;
-      padding: 0;
-      box-sizing: border-box;
-      display: block;
-    }
+.panel-section.active {
+  display: block;
+}
 
-    #mat-table input:focus { background: #eff6ff; }
-
-    /* Diagonal — locked, read-only */
-    #mat-table td.diag {
-      background: #f1f5f9;
-      color: #cbd5e1;
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    /* Lower triangle — mirrored display */
-    #mat-table td.mirror {
-      background: #fafafa;
-    }
-
-    #mat-table td.mirror input {
-      color: #94a3b8;
-      pointer-events: none;
-    }
-
-    /* Zero weight fades out */
-    #mat-table td.zero-w input { color: #d1d5db; }
-
-    /* ── Toggle switch ───────────────────────────────────────────────── */
-    .view-toggle {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: #64748b;
-      user-select: none;
-    }
-
-    .toggle-track {
-      width: 40px;
-      height: 20px;
-      background: #cbd5e1;
-      border-radius: 10px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-
-    .toggle-track.on { background: #6366f1; }
-
-    .toggle-thumb {
-      width: 16px;
-      height: 16px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: left 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-
-    .toggle-track.on .toggle-thumb { left: 22px; }
-
-    /* ── Form inputs ─────────────────────────────────────────────────── */
-    .input-row {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .input-row input[type="text"] {
-      flex: 1;
-      padding: 4px 6px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 12px;
-      background: #fff;
-      color: #1e293b;
-      outline: none;
-      min-width: 0;
-    }
-
-    .input-row input[type="text"]:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
-    }
-
-    .input-row input[type="number"] {
-      width: 80px;
-      padding: 4px 6px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 12px;
-      background: #fff;
-      color: #1e293b;
-      outline: none;
-    }
-
-    .input-row input[type="number"]:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
-    }
-
-    .input-row label {
-      font-size: 11px;
-      color: #64748b;
-      white-space: nowrap;
-      min-width: 28px;
-    }
-
-    select {
-      flex: 1;
-      padding: 4px 6px;
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      font-size: 12px;
-      background: #fff;
-      color: #1e293b;
-      outline: none;
-    }
-
-    select:focus { border-color: #6366f1; }
-
-    .hint {
-      font-size: 10px;
-      color: #ef4444;
-      margin-top: 2px;
-      min-height: 14px;
-    }
-
-    .info-line {
-      font-size: 11px;
-      color: #64748b;
-      margin: 2px 0;
-    }
-
-    /* Panels hidden when in matrix mode */
-    .plot-only { }
-    .plot-only.hidden { display: none; }
-
-    /* ── Sub-toggle header (Node / Edge panels) ─────────────────────────────── */
+/* ── Sub-toggle header (Add/Remove toggle inside each section) ─── */
 .sub-toggle-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .sub-toggle-header h3 {
   margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
 }
 
 .sub-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .sub-lbl {
   color: #94a3b8;
   font-weight: 400;
   transition: color 0.15s, font-weight 0.15s;
+  cursor: default;
 }
 
 .sub-lbl.active {
@@ -271,24 +121,175 @@
   font-weight: 600;
 }
 
+/* Smaller toggle track for sub-toggles */
 .sub-toggle-track {
-  /* Inherits toggle-track sizing — just needs a smaller scale */
-  transform: scale(0.82);
-  transform-origin: center;
+  width: 32px;
+  height: 16px;
+  background: #cbd5e1;
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
 }
 
-/* Hidden sub-panel */
+.sub-toggle-track.on {
+  background: #6366f1;
+}
+
+.sub-toggle-track .toggle-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.sub-toggle-track.on .toggle-thumb {
+  left: 18px;
+}
+
+/* ── Horizontal input rows for X/Y ──────────────────────────────── */
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input-row label {
+  font-size: 11px;
+  color: #64748b;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.input-row input[type="text"],
+.input-row input[type="number"] {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #1e293b;
+  outline: none;
+  min-width: 0;
+}
+
+.input-row input[type="text"]:focus,
+.input-row input[type="number"]:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+/* Double input row for X/Y side by side */
+.input-row-double {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.input-row-double .input-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input-row-double .input-field label {
+  font-size: 11px;
+  color: #64748b;
+  width: 20px;
+  flex-shrink: 0;
+}
+
+.input-row-double .input-field input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #1e293b;
+  outline: none;
+  width: 0;
+  min-width: 0;
+}
+
+.input-row-double .input-field input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+/* ── Select dropdowns ───────────────────────────────────────────── */
+select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #1e293b;
+  outline: none;
+}
+
+select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #6366f1;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+button:hover {
+  background: #4f46e5;
+}
+
+button.secondary {
+  background: #64748b;
+}
+
+button.secondary:hover {
+  background: #475569;
+}
+
+/* ── Hint/error messages ───────────────────────────────────────── */
+.hint {
+  font-size: 10px;
+  color: #ef4444;
+  margin-top: 4px;
+  min-height: 14px;
+}
+
+/* ── Hidden utility class ───────────────────────────────────────── */
 .sub-hidden {
   display: none;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   PlaneMatrix.css  –  Styles for the adjacency-matrix view
-   Append to (or @import from) PlaneStyle.css.
-   Replaces all previous #mat-table / .mirror / .diag / .zero-w rules.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* Panels hidden when in matrix mode */
+.plot-only.hidden {
+  display: none;
+}
 
-/* ── Scroll wrapper ──────────────────────────────────────────────────────── */
+/* ── Matrix styles (unchanged from before) ──────────────────────── */
+
+/* Scroll wrapper */
 .mat-wrap {
   overflow-x: auto;
   overflow-y: auto;
@@ -296,7 +297,7 @@
   padding-bottom: 8px;
 }
 
-/* ── Table base ──────────────────────────────────────────────────────────── */
+/* Table base */
 .mat-table {
   border-collapse: collapse;
   font-size: 13px;
@@ -304,7 +305,7 @@
   white-space: nowrap;
 }
 
-/* ── Column headers (x, y, node, A, B, C …) ─────────────────────────────── */
+/* Column headers (x, y, node, A, B, C …) */
 .mat-table .mat-hdr {
   padding: 5px 10px;
   font-weight: 600;
@@ -325,7 +326,7 @@
   min-width: 52px;
 }
 
-/* ── All cells common ────────────────────────────────────────────────────── */
+/* All cells common */
 .mat-table td {
   padding: 2px 4px;
   border: none;
@@ -336,7 +337,7 @@
   background: #f8faff;
 }
 
-/* ── Coordinate cells (x, y) ─────────────────────────────────────────────── */
+/* Coordinate cells (x, y) */
 .mat-table .mat-coord-cell input {
   width: 46px;
   text-align: right;
@@ -344,7 +345,7 @@
   font-size: 12px;
 }
 
-/* ── Node name cell ──────────────────────────────────────────────────────── */
+/* Node name cell */
 .mat-table .mat-name-cell {
   padding-left: 8px;
   padding-right: 12px;
@@ -361,7 +362,7 @@
   width: 48px;
 }
 
-/* ── Weight cells ────────────────────────────────────────────────────────── */
+/* Weight cells */
 .mat-table .mat-weight {
   text-align: center;
 }
@@ -403,7 +404,7 @@
   min-width: 44px;
 }
 
-/* ── Shared input reset for all matrix inputs ────────────────────────────── */
+/* Shared input reset for all matrix inputs */
 .mat-table input[type="text"],
 .mat-table input[type="number"] {
   border: none;
@@ -427,7 +428,7 @@
   outline: none !important;
 }
 
-/* ── Add-new row ─────────────────────────────────────────────────────────── */
+/* Add-new row */
 .mat-add-row td {
   border-top: 1px dashed #cbd5e1;
   padding: 6px 4px;
@@ -458,7 +459,7 @@
 
 .mat-add-input::placeholder { color: #cbd5e1; }
 
-/* ── Empty state ─────────────────────────────────────────────────────────── */
+/* Empty state */
 .mat-empty {
   padding: 32px 24px;
   color: #94a3b8;
@@ -498,6 +499,21 @@
   color: #fff;
   font-size: 13px;
   cursor: pointer;
+  width: auto;
 }
 
 .mat-empty-add button:hover { background: #4f46e5; }
+
+/* Wider panel adjustments */
+.controls {
+  width: 340px;
+  min-width: 340px;
+}
+
+.input-row-double {
+  gap: 12px;
+}
+
+.control-group {
+  margin-bottom: 16px;
+}
