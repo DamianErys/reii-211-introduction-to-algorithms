@@ -334,24 +334,39 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
-     LEGEND
+     LEGEND  –  depth colour swatches rendered below the canvas
      buildLegend(result) — called once after run()
    ═══════════════════════════════════════════════════════════════════════════ */
   function buildLegend(result) {
-    const swatches = document.getElementById('dfs-legend-swatches');
-    if (!swatches) return;
+    const container = document.getElementById('dfs-canvas-legend');
+    const swatches  = document.getElementById('dfs-legend-swatches');
+    if (!container || !swatches) return;
 
     swatches.innerHTML = '';
     for (let d = 0; d <= result.maxDepth; d++) {
       const col = depthToHsl(d, result.maxDepth);
       const div = document.createElement('div');
-      div.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#cbd5e1;';
+      div.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#475569;';
       div.innerHTML = `
         <span style="width:12px;height:12px;border-radius:50%;background:${col.fill};display:inline-block;flex-shrink:0;"></span>
         D${d}
       `;
       swatches.appendChild(div);
     }
+
+    container.classList.add('visible');
+
+    /* Hide again when graph is reset (AlgoShell calls reset → PlaneGraph.redraw,
+       but we also hook the reset path by observing class removal on the panel legend) */
+    const observer = new MutationObserver(() => {
+      const panelLegend = document.getElementById('dfs-legend');
+      if (panelLegend && panelLegend.style.display === 'none') {
+        container.classList.remove('visible');
+        observer.disconnect();
+      }
+    });
+    const panelLegend = document.getElementById('dfs-legend');
+    if (panelLegend) observer.observe(panelLegend, { attributes: true, attributeFilter: ['style'] });
   }
 
   /* ═══════════════════════════════════════════════════════════════════════════
@@ -361,23 +376,31 @@
     prefix: 'dfs',
     label:  'DFS',
 
+    /*
+     * panelExtra is injected inside the #dfs-legend div (shown after solve).
+     * Depth colour swatches have moved below the canvas (#dfs-canvas-legend).
+     * Only the static edge-type key stays here.
+     */
     panelExtra: `
-      <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Depth colours</div>
-      <div id="dfs-legend-swatches" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
-
-      <div style="margin-top:8px;font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Edge types</div>
-      <div style="display:flex;flex-direction:column;gap:3px;">
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#cbd5e1;">
-          <span style="width:24px;height:3px;background:#a3e635;display:inline-block;border-radius:2px;"></span> Tree edge
+      <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Edge types</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#64748b;">
+          <span style="width:24px;height:3px;background:#a3e635;display:inline-block;border-radius:2px;flex-shrink:0;"></span>
+          Tree edge
         </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#cbd5e1;">
-          <span style="width:24px;height:3px;background:#f87171;display:inline-block;border-radius:2px;border-top:2px dashed #f87171;"></span> Back edge
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#64748b;">
+          <span style="width:24px;height:3px;border-top:3px dashed #f87171;display:inline-block;flex-shrink:0;"></span>
+          Back edge
         </div>
-        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#cbd5e1;">
-          <span style="width:24px;height:3px;background:#60a5fa;display:inline-block;border-radius:2px;"></span> Cross/Fwd edge
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#64748b;">
+          <span style="width:24px;height:3px;background:#60a5fa;display:inline-block;border-radius:2px;flex-shrink:0;"></span>
+          Cross / Fwd edge
         </div>
       </div>
     `,
+
+    /* Also need paired Start / Find layout — injected via panelStartFindPaired */
+    startFindPaired: true,
 
     run:         runDFS,
     draw:        drawDFS,
