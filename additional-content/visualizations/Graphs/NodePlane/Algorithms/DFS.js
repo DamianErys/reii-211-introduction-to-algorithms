@@ -47,9 +47,18 @@
      Returns: { order, depth, parent, treeEdges, edgeType, targetFound, maxDepth }
    ═══════════════════════════════════════════════════════════════════════════ */
   function runDFS(sourceId, targetId) {
-    const { getNodes, adjacencyList } = window.PlaneGraph;
+    const { getNodes, adjacencyList, nodeById } = window.PlaneGraph;
     const nodes   = getNodes();
     const adjList = adjacencyList();
+
+    function getSortedNeighbors(u) {
+      const list = (adjList.get(u) || []).slice();
+      return list.sort((a, b) => {
+        const nameA = name(a.nodeId);
+        const nameB = name(b.nodeId);
+        return nameA.localeCompare(nameB);
+      });
+    }
 
     /* Initialise */
     const state    = {};
@@ -105,10 +114,10 @@
         snap('found', startId, null, `Target ${name(startId)} found!`);
       }
 
-      /* Stack frames: { u, neighbours[], idx } */
+      /* UPDATED: neighbors are now sorted alphabetically */
       const stack = [{
         u: startId,
-        neighbours: (adjList.get(startId) || []).slice(),
+        neighbours: getSortedNeighbors(startId),
         idx: 0,
       }];
 
@@ -125,7 +134,6 @@
           else if (state[v] === 'discovered')   etype = 'back';
           else    etype = entry[u] < entry[v] ? 'forward' : 'cross';
 
-          /* For undirected: only record the first classification */
           const ekey = `${Math.min(u, v)}-${Math.max(u, v)}`;
           if (!edgeType[ekey]) edgeType[ekey] = etype;
 
@@ -148,15 +156,14 @@
               snap('found', u, v, `Target ${name(v)} found at depth ${depth[v]}!`);
             }
 
+            /* UPDATED: neighbors are now sorted alphabetically */
             stack.push({
               u: v,
-              neighbours: (adjList.get(v) || []).slice(),
+              neighbours: getSortedNeighbors(v),
               idx: 0,
             });
           }
-
         } else {
-          /* All neighbours exhausted → process_vertex_late */
           state[u]  = 'processed';
           exitT[u]  = ++timer;
           stack.pop();
@@ -168,7 +175,7 @@
     }
 
     dfsFrom(sourceId);
-
+    
     if (targetId && !targetFound) {
       snap('notfound', null, null,
         `Target ${name(targetId)} not reachable from ${name(sourceId)}.`);
